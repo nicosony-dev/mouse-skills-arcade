@@ -1,0 +1,13 @@
+{
+  "name": "mouse-skills-arcade",
+  "version": "1.0.0",
+  "description": "Free, ad-free mouse-skills practice games for grades K-3.",
+  "private": true,
+  "scripts": {
+    "smoketest": "node smoketest.js"
+  },
+  "devDependencies": {
+    "jsdom": "^30.1.1"
+  },
+  "license": "MIT"
+}

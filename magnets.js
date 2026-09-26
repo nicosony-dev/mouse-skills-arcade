@@ -1,0 +1,79 @@
+/* Magnets engine
+   Practices: precise dragging of small tiles to arrange words/equations.
+   config = { tileSet: 'letters' | 'numbers' | 'both' }
+*/
+const MagnetsEngine = {
+  mount(container, config, api) {
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const numbers = '0123456789+-='.split('');
+    let tiles = [];
+    if (config.tileSet === 'letters') tiles = letters;
+    else if (config.tileSet === 'numbers') tiles = numbers;
+    else tiles = letters.concat(numbers);
+
+    container.innerHTML = `
+      <div class="toolbar"><button type="button" class="clear-btn">🧹 Clear board</button></div>
+      <div class="tray" aria-label="Magnet tiles"></div>
+      <div class="stage" style="min-height:340px;" aria-label="Whiteboard"></div>
+      <p class="status-line">Drag magnets onto the whiteboard to spell words or build numbers!</p>
+    `;
+
+    const tray = container.querySelector('.tray');
+    const stage = container.querySelector('.stage');
+
+    tiles.forEach(t => {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'tray-item';
+      el.style.fontFamily = "'Baloo 2', sans-serif";
+      el.style.fontSize = '1.4rem';
+      el.textContent = t;
+      el.dataset.emoji = t;
+      tray.appendChild(el);
+
+      el.addEventListener('pointerdown', (ev) => {
+        if (ev.button !== undefined && ev.button !== 0) return;
+        ev.preventDefault();
+        const ghost = document.createElement('div');
+        ghost.className = 'placed-item';
+        ghost.style.fontFamily = "'Baloo 2', sans-serif";
+        ghost.style.fontSize = '1.6rem';
+        ghost.textContent = t;
+        ghost.style.position = 'fixed';
+        ghost.style.left = ev.clientX - 16 + 'px';
+        ghost.style.top = ev.clientY - 16 + 'px';
+        ghost.style.pointerEvents = 'none';
+        ghost.style.zIndex = '999';
+        document.body.appendChild(ghost);
+        function move(mv) {
+          ghost.style.left = mv.clientX - 16 + 'px';
+          ghost.style.top = mv.clientY - 16 + 'px';
+        }
+        function up(uv) {
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', up);
+          const r = stage.getBoundingClientRect();
+          if (uv.clientX >= r.left && uv.clientX <= r.right && uv.clientY >= r.top && uv.clientY <= r.bottom) {
+            const placed = document.createElement('div');
+            placed.className = 'placed-item';
+            placed.style.fontFamily = "'Baloo 2', sans-serif";
+            placed.style.fontSize = '1.6rem';
+            placed.textContent = t;
+            placed.style.left = (uv.clientX - r.left - 16) + 'px';
+            placed.style.top = (uv.clientY - r.top - 16) + 'px';
+            stage.appendChild(placed);
+            makeDraggable(placed, stage, { bounds: true });
+            placed.addEventListener('dblclick', () => placed.remove());
+          }
+          ghost.remove();
+        }
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up);
+      });
+    });
+
+    container.querySelector('.clear-btn').addEventListener('click', () => {
+      stage.querySelectorAll('.placed-item').forEach(n => n.remove());
+    });
+  }
+};
