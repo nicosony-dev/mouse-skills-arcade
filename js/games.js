@@ -300,3 +300,4 @@ const GAME_REGISTRY = {
 };
 
 const GRADE_LABELS = { K: 'Kindergarten', 1: 'Grade 1', 2: 'Grade 2', 3: 'Grade 3' };
+const GRADE_ORDER = ['K', 1, 2, 3];
