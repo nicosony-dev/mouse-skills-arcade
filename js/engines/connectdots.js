@@ -1,30 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Connect the Dots — Demo</title>
-<style>
-  body { font-family: 'Segoe UI', sans-serif; background:#f4f6f5; margin:0; padding:24px; }
-  h1 { text-align:center; color:#2F5D50; }
-  #game { max-width: 800px; margin: 0 auto; background:#fff; border-radius:16px;
-          padding:16px; box-shadow:0 2px 12px rgba(0,0,0,0.1); }
-  .dot { position:absolute; transform:translate(-50%,-50%); width:34px; height:34px;
-         border-radius:50%; border:2px solid #2F5D50; background:#fff; color:#2F5D50;
-         font-weight:700; cursor:pointer; }
-  .dot.done { background:#2F5D50; color:#fff; }
-  .dot.next { box-shadow:0 0 0 4px rgba(47,93,80,0.3); }
-  .status-line { text-align:center; font-size:18px; font-weight:600; color:#2F5D50; }
-  .toolbar.level-picker { text-align:center; margin-bottom:8px; }
-  .toolbar.level-picker button { margin:0 4px; padding:6px 12px; border-radius:8px; border:1px solid #2F5D50; background:#fff; cursor:pointer; }
-  .toolbar.level-picker button.active { background:#2F5D50; color:#fff; }
-</style>
-</head>
-<body>
-  <h1>Connect the Dots — Demo</h1>
-  <div id="game"></div>
-
-  <script>
 /* Connect the Dots engine
    Practices: precise point-and-click cursor placement, in sequence.
    config = {
@@ -524,16 +497,3 @@ const ConnectDotsEngine = {
     });
   }
 };
-
-  </script>
-  <script>
-    ConnectDotsEngine.mount(document.getElementById('game'), {
-      levels: [
-        { label: '1–10', sequence: Array.from({length:10}, (_, i) => String(i+1)) },
-        { label: '1–20', sequence: Array.from({length:20}, (_, i) => String(i+1)) }
-      ],
-      revealEmoji: '🌟'
-    });
-  </script>
-</body>
-</html>
