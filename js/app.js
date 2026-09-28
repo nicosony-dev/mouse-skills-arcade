@@ -24,7 +24,7 @@ function renderTopbar(view) {
 
 function renderHome() {
   renderTopbar('home');
-  const grades = Object.keys(GAME_REGISTRY);
+  const grades = GRADE_ORDER;
   app.innerHTML = `
     <div class="shelf-wrap">
       <div class="shelf-intro">
