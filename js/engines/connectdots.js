@@ -11,12 +11,32 @@
    Grade 1 round both trace a recognizable picture, not a random zigzag.
 */
 
+/** Vertices of a regular polygon (used for the circle, hexagon, and
+    pentagon shapes below) — n evenly spaced points around a center. */
+function regularPolygonVertices(sides, cx, cy, r, startAngle) {
+  const pts = [];
+  for (let k = 0; k < sides; k++) {
+    const angle = startAngle + k * (2 * Math.PI / sides);
+    pts.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle)]);
+  }
+  return pts;
+}
+
 // Each shape is a closed polygon, given as normalized (0–1) vertices in the
 // order a pencil would trace them. The engine "closes the loop" itself by
 // drawing one extra line from the last dot back to the first once the
 // picture is finished, so every shape ends up looking whole.
+//
+// Shapes are split into two non-overlapping pools via `category` — 'numbers'
+// or 'letters' — so Connect the Dots and Connect the Dots ABC never draw
+// from the same set. A student who plays both back-to-back is guaranteed
+// two different pictures, not just "probably different." Each category has
+// at least 5 shapes that work even at Kindergarten's 10 dots; a couple of
+// extra shapes with finer detail (marked minPoints) join the pool only once
+// a round has enough dots to trace them cleanly.
 const CONNECT_DOTS_SHAPES = [
-  { name: 'star', vertices: (() => {
+  // ---- numbers pool ----
+  { name: 'star', category: 'numbers', vertices: (() => {
       const pts = [];
       const cx = 0.5, cy = 0.5, outerR = 0.44, innerR = 0.18;
       for (let k = 0; k < 10; k++) {
@@ -26,23 +46,44 @@ const CONNECT_DOTS_SHAPES = [
       }
       return pts;
     })() },
-  { name: 'house', vertices: [
+  { name: 'house', category: 'numbers', vertices: [
       [0.15, 0.9], [0.85, 0.9], [0.85, 0.5], [0.5, 0.15], [0.15, 0.5]
     ] },
-  { name: 'heart', vertices: [
-      [0.5, 0.95], [0.15, 0.55], [0.28, 0.22], [0.5, 0.38], [0.72, 0.22], [0.85, 0.55]
+  { name: 'sun', category: 'numbers',
+    vertices: regularPolygonVertices(12, 0.5, 0.5, 0.42, -Math.PI / 2) },
+  { name: 'triangle', category: 'numbers', vertices: [
+      [0.5, 0.05], [0.92, 0.9], [0.08, 0.9]
     ] },
-  { name: 'kite', vertices: [
-      [0.5, 0.05], [0.85, 0.45], [0.5, 0.95], [0.15, 0.45]
+  { name: 'leaf', category: 'numbers', vertices: [
+      [0.05, 0.5], [0.25, 0.25], [0.55, 0.15], [0.8, 0.25],
+      [0.95, 0.5], [0.8, 0.75], [0.55, 0.85], [0.25, 0.75]
     ] },
-  // Arrow and tree have a thin "notch" (the arrow's wings, the tree's trunk)
-  // that only reads correctly once there are enough dots to trace it —
-  // minPoints keeps them out of the pool for very short sequences (like
-  // Kindergarten's 10 dots), where they'd collapse into a blob.
-  { name: 'arrow', minPoints: 14, vertices: [
+  { name: 'arrow', category: 'numbers', minPoints: 14, vertices: [
       [0.5, 0.05], [0.85, 0.4], [0.65, 0.4], [0.65, 0.95], [0.35, 0.95], [0.35, 0.4], [0.15, 0.4]
     ] },
-  { name: 'tree', minPoints: 14, vertices: [
+
+  // ---- letters pool ----
+  { name: 'heart', category: 'letters', vertices: [
+      [0.5, 0.95], [0.15, 0.55], [0.28, 0.22], [0.5, 0.38], [0.72, 0.22], [0.85, 0.55]
+    ] },
+  { name: 'kite', category: 'letters', vertices: [
+      [0.5, 0.05], [0.85, 0.45], [0.5, 0.95], [0.15, 0.45]
+    ] },
+  { name: 'hexagon', category: 'letters',
+    vertices: regularPolygonVertices(6, 0.5, 0.5, 0.42, -Math.PI / 2) },
+  { name: 'pentagon', category: 'letters',
+    vertices: regularPolygonVertices(5, 0.5, 0.52, 0.42, -Math.PI / 2) },
+  { name: 'egg', category: 'letters',
+    vertices: (() => {
+      const pts = [];
+      const cx = 0.5, cy = 0.5, rx = 0.3, ry = 0.44;
+      for (let k = 0; k < 12; k++) {
+        const angle = -Math.PI / 2 + k * (2 * Math.PI / 12);
+        pts.push([cx + rx * Math.cos(angle), cy + ry * Math.sin(angle)]);
+      }
+      return pts;
+    })() },
+  { name: 'tree', category: 'letters', minPoints: 14, vertices: [
       [0.5, 0.05], [0.85, 0.5], [0.6, 0.5], [0.6, 0.95], [0.4, 0.95], [0.4, 0.5], [0.15, 0.5]
     ] }
 ];
@@ -102,10 +143,15 @@ const ConnectDotsEngine = {
       const w = stage.clientWidth || 600;
       const h = stage.clientHeight || 440;
       // Genuinely random each time (Math.random, not a fixed seed) so
-      // "New picture" actually changes the picture. Shapes with a minPoints
-      // requirement are excluded when this round doesn't have enough dots
-      // to trace their thinner details cleanly.
-      const eligibleShapes = CONNECT_DOTS_SHAPES.filter(s => !s.minPoints || sequence.length >= s.minPoints);
+      // "New picture" actually changes the picture. Two filters narrow the
+      // pool: category keeps the numbers game and the letters game drawing
+      // from entirely separate shapes (so playing both never repeats a
+      // picture), and minPoints excludes shapes whose thin details would
+      // collapse into a blob on a short sequence (like Kindergarten's 10 dots).
+      const category = /^[0-9]+$/.test(String(sequence[0])) ? 'numbers' : 'letters';
+      const eligibleShapes = CONNECT_DOTS_SHAPES.filter(s =>
+        s.category === category && (!s.minPoints || sequence.length >= s.minPoints)
+      );
       const shape = eligibleShapes[Math.floor(Math.random() * eligibleShapes.length)];
       const rawPoints = resampleClosedPolygon(shape.vertices, sequence.length);
 
