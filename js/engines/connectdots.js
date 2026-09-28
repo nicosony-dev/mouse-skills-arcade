@@ -119,8 +119,15 @@ function resampleClosedPolygon(vertices, n) {
 
 const ConnectDotsEngine = {
   mount(container, config, api) {
-    const sequence = config.sequence || [];
+    // Most grades just get a single fixed sequence. Where config.levels is
+    // given (Kindergarten's two Connect the Dots games), a small toggle lets
+    // a student who's ready go past the grade's default range — 10 to 20,
+    // or A–J to A–Z — without needing a whole separate tile on the shelf.
+    let sequence = config.sequence || [];
+    const hasLevels = Array.isArray(config.levels) && config.levels.length > 1;
+
     container.innerHTML = `
+      ${hasLevels ? '<div class="toolbar level-picker" aria-label="Choose a range"></div>' : ''}
       <div class="stage" aria-label="Connect the dots stage" style="min-height:560px;"></div>
       <p class="status-line"></p>
     `;
@@ -239,18 +246,40 @@ const ConnectDotsEngine = {
       }
     }
 
-    const toolbar = document.createElement('div');
-    toolbar.className = 'toolbar';
-    toolbar.innerHTML = `<button type="button" class="restart-btn">🔄 New picture</button>`;
-    container.insertBefore(toolbar, stage);
-    toolbar.querySelector('.restart-btn').addEventListener('click', () => {
+    function startNewRound() {
       nextIndex = 0;
       svg.innerHTML = '';
       stage.querySelectorAll('div').forEach(d => d.remove()); // clear any reveal sticker
       layout();
       render();
-      status.textContent = `Click ${positions[0].label} to start.`;
-    });
+      status.textContent = sequence.length ? `Click ${positions[0].label} to start.` : '';
+    }
+
+    const toolbar = document.createElement('div');
+    toolbar.className = 'toolbar';
+    toolbar.innerHTML = `<button type="button" class="restart-btn">🔄 New picture</button>`;
+    container.insertBefore(toolbar, stage);
+    toolbar.querySelector('.restart-btn').addEventListener('click', startNewRound);
+
+    if (hasLevels) {
+      const levelPicker = container.querySelector('.level-picker');
+      levelPicker.innerHTML = '<span style="font-weight:700; margin-right:4px;">Range:</span>';
+      config.levels.forEach((level, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = level.label;
+        if (level.sequence === sequence || (i === 0 && !levelPicker.querySelector('.active'))) {
+          btn.classList.add('active');
+        }
+        btn.addEventListener('click', () => {
+          sequence = level.sequence;
+          levelPicker.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          startNewRound();
+        });
+        levelPicker.appendChild(btn);
+      });
+    }
 
     // Give the stage a moment to receive real layout dimensions.
     requestAnimationFrame(() => {
