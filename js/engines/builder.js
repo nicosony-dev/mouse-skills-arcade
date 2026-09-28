@@ -65,13 +65,55 @@ const BuilderEngine = {
       const stageRect = stage.getBoundingClientRect();
       const el = document.createElement('div');
       el.className = 'placed-item';
-      el.textContent = sourceEl.dataset.emoji;
       const x = clientX - stageRect.left - 20;
       const y = clientY - stageRect.top - 20;
       el.style.left = Math.max(0, x) + 'px';
       el.style.top = Math.max(0, y) + 'px';
+
+      // The emoji lives in its own inner span so we can resize just the
+      // emoji (via font-size) without resizing the drag/resize hit-areas.
+      let size = 40; // starting size in px
+      const emojiSpan = document.createElement('span');
+      emojiSpan.className = 'placed-item-emoji';
+      emojiSpan.textContent = sourceEl.dataset.emoji;
+      emojiSpan.style.fontSize = size + 'px';
+      el.appendChild(emojiSpan);
+
+      // A small drag handle in the corner lets kids resize the piece after
+      // placing it — bigger to make it stand out, smaller to fit more in.
+      const handle = document.createElement('div');
+      handle.className = 'resize-handle';
+      handle.setAttribute('aria-label', 'Drag to resize');
+      handle.innerHTML = '⤡';
+      el.appendChild(handle);
+
       stage.appendChild(el);
       makeDraggable(el, stage, { bounds: true });
+
+      handle.addEventListener('pointerdown', (ev) => {
+        ev.stopPropagation(); // don't also trigger the item's own drag-to-move
+        ev.preventDefault();
+        const rect = el.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const startDist = Math.hypot(ev.clientX - centerX, ev.clientY - centerY) || 1;
+        const startSize = size;
+
+        function move(mv) {
+          const dist = Math.hypot(mv.clientX - centerX, mv.clientY - centerY);
+          size = Math.max(20, Math.min(140, startSize * (dist / startDist)));
+          emojiSpan.style.fontSize = size + 'px';
+        }
+        function up() {
+          window.removeEventListener('pointermove', move);
+          window.removeEventListener('pointerup', up);
+        }
+        window.addEventListener('pointermove', move);
+        window.addEventListener('pointerup', up);
+      });
+      // Don't let a double-click on the resize handle also delete the piece.
+      handle.addEventListener('dblclick', (ev) => ev.stopPropagation());
+
       // Double-click / double-tap removes a placed piece.
       el.addEventListener('dblclick', () => { el.remove(); placedCount--; updateStatus(); });
       placedCount++;
