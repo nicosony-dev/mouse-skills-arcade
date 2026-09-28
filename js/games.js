@@ -21,14 +21,26 @@ const GAME_REGISTRY = {
     },
     {
       title: 'Connect the Dots', icon: '🔢', skill: 'Click the numbers in order to find the hidden picture!',
-      engine: 'connectdots', config: { sequence: Array.from({ length: 10 }, (_, i) => String(i + 1)), revealEmoji: '⭐' }
+      engine: 'connectdots', config: { sequence: Array.from({ length: 10 }, (_, i) => String(i + 1)), revealEmoji: '⭐',
+        // Kindergartners who are ready to count past 10 can switch to the
+        // 1–20 range right in the game, without needing a separate tile.
+        levels: [
+          { label: '1–10', sequence: Array.from({ length: 10 }, (_, i) => String(i + 1)) },
+          { label: '1–20 (challenge)', sequence: Array.from({ length: 20 }, (_, i) => String(i + 1)) }
+        ] }
     },
     {
       title: 'Connect the Dots ABC', icon: '🔤', skill: 'Click the letters in order to find the hidden picture!',
-      engine: 'connectdots', config: { sequence: 'ABCDEFGHIJ'.split(''), revealEmoji: '🌈' }
+      engine: 'connectdots', config: { sequence: 'ABCDEFGHIJ'.split(''), revealEmoji: '🌈',
+        // Kindergartners who already know their ABCs past J can switch to
+        // the full A–Z range right in the game.
+        levels: [
+          { label: 'A–J', sequence: 'ABCDEFGHIJ'.split('') },
+          { label: 'A–Z (challenge)', sequence: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') }
+        ] }
     },
     {
-      title: 'Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
+      title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
       engine: 'paint', config: { brushSizes: [10, 18, 28] }
     },
     {
