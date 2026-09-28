@@ -121,7 +121,7 @@ const ConnectDotsEngine = {
   mount(container, config, api) {
     const sequence = config.sequence || [];
     container.innerHTML = `
-      <div class="stage" aria-label="Connect the dots stage"></div>
+      <div class="stage" aria-label="Connect the dots stage" style="min-height:560px;"></div>
       <p class="status-line"></p>
     `;
     const stage = container.querySelector('.stage');
@@ -155,10 +155,12 @@ const ConnectDotsEngine = {
       const shape = eligibleShapes[Math.floor(Math.random() * eligibleShapes.length)];
       const rawPoints = resampleClosedPolygon(shape.vertices, sequence.length);
 
-      // Fit the normalized 0–1 shape into the stage with generous padding
-      // so dot labels near the edges don't get clipped.
-      const padX = w * 0.14;
-      const padY = h * 0.14;
+      // Fit the normalized 0–1 shape into the stage, using nearly the whole
+      // area (just enough padding to keep dot circles from clipping at the
+      // edges). A bigger shape means longer mouse travel between
+      // consecutive dots — more fine-motor practice per click.
+      const padX = Math.max(24, w * 0.05);
+      const padY = Math.max(24, h * 0.05);
       const usableW = w - padX * 2;
       const usableH = h - padY * 2;
 
