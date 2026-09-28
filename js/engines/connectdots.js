@@ -9,6 +9,13 @@
    arrow, kite, tree), picked at random, and resampled to however many dots
    this grade's sequence needs — so a 10-dot Kindergarten round and a 26-dot
    Grade 1 round both trace a recognizable picture, not a random zigzag.
+
+   NOTE: every shape below was verified by plotting its vertices as a closed
+   polygon (see the verification script used to build this) before being
+   added to the pool — several of the original detailed shapes (sailboat,
+   sun-rays, fish, butterfly, flower, rocket, turtle, tree, leaf, and the
+   house's chimney) didn't actually resemble their names once rendered and
+   were redrawn from scratch with corrected coordinates.
 */
 
 /** Vertices of a regular polygon (used for the circle, hexagon, and
@@ -18,6 +25,39 @@ function regularPolygonVertices(sides, cx, cy, r, startAngle) {
   for (let k = 0; k < sides; k++) {
     const angle = startAngle + k * (2 * Math.PI / sides);
     pts.push([cx + r * Math.cos(angle), cy + r * Math.sin(angle)]);
+  }
+  return pts;
+}
+
+/** N evenly-spaced pointed rays around a circle: each ray is a base point on
+    the inner circle followed by a tip point at the outer radius, centered
+    between that base and the next one. Wider/fewer rays (default 8) survive
+    resampling down to as few as 14 dots without collapsing into a lumpy
+    gear the way many thin rays did in the original version. */
+function sunRaysVertices(numRays = 8, cx = 0.5, cy = 0.5, innerR = 0.3, outerR = 0.46) {
+  const pts = [];
+  for (let k = 0; k < numRays; k++) {
+    const baseAngle = -Math.PI / 2 + k * (2 * Math.PI / numRays);
+    const nextAngle = -Math.PI / 2 + (k + 1) * (2 * Math.PI / numRays);
+    const midAngle = (baseAngle + nextAngle) / 2;
+    pts.push([cx + innerR * Math.cos(baseAngle), cy + innerR * Math.sin(baseAngle)]);
+    pts.push([cx + outerR * Math.cos(midAngle), cy + outerR * Math.sin(midAngle)]);
+  }
+  return pts;
+}
+
+/** N petals, each drawn as valley -> tip-left -> tip-right so the tip is a
+    short flat edge instead of a single sharp point — reads as a rounded
+    petal instead of a star point once connected. */
+function flowerVertices(numPetals = 6, cx = 0.5, cy = 0.5, innerR = 0.2, outerR = 0.42, tipSpreadDeg = 10) {
+  const pts = [];
+  const spread = tipSpreadDeg * Math.PI / 180;
+  for (let k = 0; k < numPetals; k++) {
+    const valleyAngle = -Math.PI / 2 + k * (2 * Math.PI / numPetals);
+    const centerAngle = valleyAngle + (Math.PI / numPetals);
+    pts.push([cx + innerR * Math.cos(valleyAngle), cy + innerR * Math.sin(valleyAngle)]);
+    pts.push([cx + outerR * Math.cos(centerAngle - spread), cy + outerR * Math.sin(centerAngle - spread)]);
+    pts.push([cx + outerR * Math.cos(centerAngle + spread), cy + outerR * Math.sin(centerAngle + spread)]);
   }
   return pts;
 }
@@ -55,38 +95,38 @@ const CONNECT_DOTS_SHAPES = [
       [0.5, 0.05], [0.92, 0.9], [0.08, 0.9]
     ] },
   { name: 'leaf', category: 'numbers', vertices: [
-      [0.05, 0.5], [0.25, 0.25], [0.55, 0.15], [0.8, 0.25],
-      [0.95, 0.5], [0.8, 0.75], [0.55, 0.85], [0.25, 0.75]
+      // Elongated pointed oval: tip at top, stem point at bottom.
+      [0.5, 0.05], [0.75, 0.25], [0.85, 0.5], [0.72, 0.75],
+      [0.5, 0.95], [0.28, 0.75], [0.15, 0.5], [0.25, 0.25]
     ] },
   // ---- numbers "challenge" shapes (join the pool once a round has 14+
   // dots, i.e. Grade 1's default 20-dot round and Kindergarten's 1–20
   // challenge toggle) ----
   { name: 'tree', category: 'numbers', minPoints: 14, vertices: [
-      [0.5, 0.05], [0.85, 0.5], [0.6, 0.5], [0.6, 0.95], [0.4, 0.95], [0.4, 0.5], [0.15, 0.5]
+      // 3-tier fir/pine tree over a trunk (was previously a plain arrow).
+      [0.5, 0.05],
+      [0.65, 0.28], [0.55, 0.28],
+      [0.75, 0.5], [0.6, 0.5],
+      [0.88, 0.72], [0.58, 0.72], [0.58, 0.92], [0.42, 0.92], [0.42, 0.72],
+      [0.12, 0.72], [0.4, 0.5], [0.25, 0.5], [0.45, 0.28], [0.35, 0.28]
     ] },
   { name: 'sailboat', category: 'numbers', minPoints: 14, vertices: [
-      [0.05, 0.82], [0.5, 0.95], [0.95, 0.82], [0.55, 0.82], [0.55, 0.15], [0.2, 0.78]
+      // Triangular sail on a trapezoid hull; the hull "steps out" past the
+      // sail's base corners so the deck reads as a distinct line under it.
+      [0.55, 0.08], [0.75, 0.65], [0.85, 0.7], [0.78, 0.9],
+      [0.22, 0.9], [0.15, 0.7], [0.35, 0.65]
     ] },
   { name: 'house-chimney', category: 'numbers', minPoints: 14, vertices: [
-      [0.15, 0.9], [0.85, 0.9], [0.85, 0.5], [0.745, 0.395], [0.745, 0.245],
-      [0.6575, 0.1575], [0.6575, 0.3075], [0.5, 0.15], [0.15, 0.5]
+      // Chimney is a clean rectangular notch cut into the roofline.
+      [0.15, 0.9], [0.85, 0.9], [0.85, 0.5], [0.71, 0.39], [0.71, 0.2],
+      [0.63, 0.2], [0.63, 0.33], [0.5, 0.15], [0.15, 0.5]
     ] },
-  { name: 'sun-rays', category: 'numbers', minPoints: 14, vertices: (() => {
-      // A denser base circle (40 points) with a modest ray bump every 10th
-      // point — arc-length resampling naturally favors long edges, so a
-      // coarser polygon here would collapse into a plain diamond by the
-      // time it's resampled down to 20 dots.
-      const pts = [];
-      for (let k = 0; k < 40; k++) {
-        const angle = -Math.PI / 2 + k * (2 * Math.PI / 40);
-        const r = k % 10 === 0 ? 0.44 : 0.34;
-        pts.push([0.5 + r * Math.cos(angle), 0.5 + r * Math.sin(angle)]);
-      }
-      return pts;
-    })() },
+  { name: 'sun-rays', category: 'numbers', minPoints: 14, vertices: sunRaysVertices() },
   { name: 'fish', category: 'numbers', minPoints: 14, vertices: [
-      [0.05, 0.5], [0.25, 0.3], [0.5, 0.22], [0.68, 0.3], [0.95, 0.15],
-      [0.78, 0.5], [0.95, 0.85], [0.68, 0.7], [0.5, 0.78], [0.25, 0.7]
+      // Rounder body with a dorsal fin bump, a belly fin bump, and a clear
+      // forked tail (was reading as a dart/arrow before).
+      [0.05, 0.5], [0.22, 0.32], [0.48, 0.2], [0.6, 0.35], [0.95, 0.22],
+      [0.75, 0.5], [0.95, 0.78], [0.6, 0.65], [0.48, 0.8], [0.22, 0.68]
     ] },
 
   // ---- letters pool ----
@@ -114,23 +154,30 @@ const CONNECT_DOTS_SHAPES = [
   // dots, i.e. Grade 1's default 26-dot round and Kindergarten's A–Z
   // challenge toggle) ----
   { name: 'butterfly', category: 'letters', minPoints: 14, vertices: [
-      [0.5, 0.15], [0.92, 0.35], [0.6, 0.55], [0.5, 0.88], [0.4, 0.55], [0.08, 0.35]
+      // Big upper wings, smaller lower wings, short tail. NOTE: still the
+      // weakest shape in the set — with only 10 straight-line points it
+      // reads more like a bowtie/moth silhouette than a rounded butterfly.
+      // Bump this shape to ~16 points (see flowerVertices/sunRaysVertices
+      // for the pattern) if a more convincing butterfly is needed.
+      [0.5, 0.15],
+      [0.88, 0.28], [0.58, 0.42],
+      [0.8, 0.58], [0.53, 0.58],
+      [0.5, 0.7],
+      [0.47, 0.58], [0.2, 0.58],
+      [0.42, 0.42], [0.12, 0.28]
     ] },
-  { name: 'flower', category: 'letters', minPoints: 14, vertices: (() => {
-      const pts = [];
-      for (let k = 0; k < 12; k++) {
-        const angle = -Math.PI / 2 + k * (2 * Math.PI / 12);
-        const r = k % 2 === 0 ? 0.42 : 0.22;
-        pts.push([0.5 + r * Math.cos(angle), 0.5 + r * Math.sin(angle)]);
-      }
-      return pts;
-    })() },
+  { name: 'flower', category: 'letters', minPoints: 14, vertices: flowerVertices() },
   { name: 'rocket', category: 'letters', minPoints: 14, vertices: [
-      [0.5, 0.05], [0.62, 0.5], [0.88, 0.92], [0.58, 0.78], [0.42, 0.78], [0.12, 0.92], [0.38, 0.5]
+      // Nose cone -> body -> flared fin -> pinch back in -> flat exhaust,
+      // mirrored on the other side. No crossing lines.
+      [0.5, 0.05], [0.62, 0.45], [0.85, 0.75], [0.62, 0.65],
+      [0.58, 0.9], [0.42, 0.9], [0.38, 0.65], [0.15, 0.75], [0.38, 0.45]
     ] },
   { name: 'turtle', category: 'letters', minPoints: 14, vertices: [
-      [0.05, 0.5], [0.22, 0.4], [0.35, 0.18], [0.65, 0.18], [0.85, 0.4], [0.7, 0.52],
-      [0.95, 0.55], [0.7, 0.6], [0.6, 0.92], [0.5, 0.72], [0.3, 0.92], [0.22, 0.6]
+      // Head, domed shell, tail, two simple leg bumps (was an unrecognizable
+      // jagged blob before — simplified rather than over-detailed).
+      [0.05, 0.5], [0.22, 0.22], [0.72, 0.22], [0.95, 0.5], [0.75, 0.65],
+      [0.6, 0.88], [0.5, 0.68], [0.35, 0.88], [0.22, 0.65]
     ] },
   { name: 'castle', category: 'letters', minPoints: 14, vertices: [
       [0.08, 0.9], [0.08, 0.45], [0.16, 0.45], [0.16, 0.35], [0.24, 0.35], [0.24, 0.45],
