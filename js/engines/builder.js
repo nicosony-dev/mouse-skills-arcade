@@ -45,6 +45,14 @@ const BuilderEngine = {
       stage.appendChild(bg);
     }
 
+    // Tapping empty stage space (not any placed item) deselects everything,
+    // hiding all resize handles.
+    stage.addEventListener('pointerdown', (ev) => {
+      if (ev.target === stage) {
+        stage.querySelectorAll('.placed-item.selected').forEach(n => n.classList.remove('selected'));
+      }
+    });
+
     let placedCount = 0;
 
     function updateStatus() {
@@ -88,7 +96,18 @@ const BuilderEngine = {
       el.appendChild(handle);
 
       stage.appendChild(el);
-      makeDraggable(el, stage, { bounds: true });
+
+      // Only the "selected" piece shows its resize handle — otherwise every
+      // placed item would keep a permanent blue dot stuck to it. Placing a
+      // new item selects it (and deselects everything else); tapping empty
+      // stage space (handled below) clears the selection entirely.
+      function selectThis() {
+        stage.querySelectorAll('.placed-item.selected').forEach(n => n.classList.remove('selected'));
+        el.classList.add('selected');
+      }
+      selectThis();
+
+      makeDraggable(el, stage, { bounds: true, onStart: selectThis });
 
       handle.addEventListener('pointerdown', (ev) => {
         ev.stopPropagation(); // don't also trigger the item's own drag-to-move
