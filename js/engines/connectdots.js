@@ -1,3 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Connect the Dots — Demo</title>
+<style>
+  body { font-family: 'Segoe UI', sans-serif; background:#f4f6f5; margin:0; padding:24px; }
+  h1 { text-align:center; color:#2F5D50; }
+  #game { max-width: 800px; margin: 0 auto; background:#fff; border-radius:16px;
+          padding:16px; box-shadow:0 2px 12px rgba(0,0,0,0.1); }
+  .dot { position:absolute; transform:translate(-50%,-50%); width:34px; height:34px;
+         border-radius:50%; border:2px solid #2F5D50; background:#fff; color:#2F5D50;
+         font-weight:700; cursor:pointer; }
+  .dot.done { background:#2F5D50; color:#fff; }
+  .dot.next { box-shadow:0 0 0 4px rgba(47,93,80,0.3); }
+  .status-line { text-align:center; font-size:18px; font-weight:600; color:#2F5D50; }
+  .toolbar.level-picker { text-align:center; margin-bottom:8px; }
+  .toolbar.level-picker button { margin:0 4px; padding:6px 12px; border-radius:8px; border:1px solid #2F5D50; background:#fff; cursor:pointer; }
+  .toolbar.level-picker button.active { background:#2F5D50; color:#fff; }
+</style>
+</head>
+<body>
+  <h1>Connect the Dots — Demo</h1>
+  <div id="game"></div>
+
+  <script>
 /* Connect the Dots engine
    Practices: precise point-and-click cursor placement, in sequence.
    config = {
@@ -9,14 +36,113 @@
    arrow, kite, tree), picked at random, and resampled to however many dots
    this grade's sequence needs — so a 10-dot Kindergarten round and a 26-dot
    Grade 1 round both trace a recognizable picture, not a random zigzag.
-
-   NOTE: every shape below was verified by plotting its vertices as a closed
-   polygon (see the verification script used to build this) before being
-   added to the pool — several of the original detailed shapes (sailboat,
-   sun-rays, fish, butterfly, flower, rocket, turtle, tree, leaf, and the
-   house's chimney) didn't actually resemble their names once rendered and
-   were redrawn from scratch with corrected coordinates.
 */
+
+/* =========================================================================
+   REUSABLE K-2 SKILL: double-click to enlarge a picture.
+   Not specific to Connect the Dots — drop `attachEnlargeOnDoubleClick` into
+   any web app (the escape room, the attendance app, etc.) wherever a small
+   picture should pop up bigger on double-click.
+
+   Usage:
+     attachEnlargeOnDoubleClick(someSmallElement, {
+       buildEnlargedHTML: () => '<img src="...">',   // or any HTML string
+       label: 'A sailboat'                             // optional caption
+     });
+
+   Behavior:
+   - Double-click (or double-tap) the small element opens it full-size in a
+     centered overlay.
+   - Kids can close it by double-clicking the enlarged picture again, by
+     tapping the big ✖ button, by tapping the dark background, or by
+     pressing Escape — several easy ways out, since K-2 kids won't all
+     discover the same one.
+   - A small pulsing 🔍 badge sits on the corner of every enlargeable
+     thumbnail as a visual hint, since "double-click" isn't very
+     discoverable for this age group on its own.
+========================================================================= */
+function attachEnlargeOnDoubleClick(smallEl, { buildEnlargedHTML, label = '' }) {
+  smallEl.style.cursor = 'zoom-in';
+  smallEl.style.position = smallEl.style.position || 'relative';
+  smallEl.setAttribute('title', 'Double-click to make it bigger!');
+
+  // Small pulsing magnifying-glass hint badge.
+  const badge = document.createElement('div');
+  badge.textContent = '🔍';
+  badge.setAttribute('aria-hidden', 'true');
+  Object.assign(badge.style, {
+    position: 'absolute', right: '-6px', bottom: '-6px',
+    fontSize: '18px', background: '#fff', borderRadius: '50%',
+    width: '26px', height: '26px', display: 'flex',
+    alignItems: 'center', justifyContent: 'center',
+    boxShadow: '0 1px 4px rgba(0,0,0,0.3)',
+    animation: 'enlargeHintPulse 1.6s ease-in-out infinite'
+  });
+  smallEl.appendChild(badge);
+
+  if (!document.getElementById('enlarge-hint-style')) {
+    const style = document.createElement('style');
+    style.id = 'enlarge-hint-style';
+    style.textContent = `
+      @keyframes enlargeHintPulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function openOverlay() {
+    const overlay = document.createElement('div');
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-label', label || 'Enlarged picture');
+    Object.assign(overlay.style, {
+      position: 'fixed', inset: '0', background: 'rgba(0,0,0,0.6)',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+      justifyContent: 'center', zIndex: '9999', padding: '24px'
+    });
+
+    const card = document.createElement('div');
+    Object.assign(card.style, {
+      background: '#fff', borderRadius: '20px', padding: '24px',
+      maxWidth: '90vw', maxHeight: '85vh', display: 'flex',
+      flexDirection: 'column', alignItems: 'center', gap: '12px',
+      boxShadow: '0 8px 30px rgba(0,0,0,0.35)'
+    });
+    card.innerHTML = buildEnlargedHTML();
+    card.style.cursor = 'zoom-out';
+
+    if (label) {
+      const caption = document.createElement('p');
+      caption.textContent = label;
+      Object.assign(caption.style, { fontSize: '22px', fontWeight: '700', margin: '0' });
+      card.appendChild(caption);
+    }
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.textContent = '✖ Close';
+    Object.assign(closeBtn.style, {
+      fontSize: '18px', padding: '10px 20px', borderRadius: '12px',
+      border: 'none', background: '#e74c3c', color: '#fff',
+      cursor: 'pointer', fontWeight: '700'
+    });
+    card.appendChild(closeBtn);
+
+    overlay.appendChild(card);
+    document.body.appendChild(overlay);
+
+    function close() { overlay.remove(); document.removeEventListener('keydown', onKey); }
+    function onKey(e) { if (e.key === 'Escape') close(); }
+
+    card.addEventListener('dblclick', close);
+    closeBtn.addEventListener('click', close);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+    document.addEventListener('keydown', onKey);
+  }
+
+  smallEl.addEventListener('dblclick', openOverlay);
+}
 
 /** Vertices of a regular polygon (used for the circle, hexagon, and
     pentagon shapes below) — n evenly spaced points around a center. */
@@ -29,11 +155,6 @@ function regularPolygonVertices(sides, cx, cy, r, startAngle) {
   return pts;
 }
 
-/** N evenly-spaced pointed rays around a circle: each ray is a base point on
-    the inner circle followed by a tip point at the outer radius, centered
-    between that base and the next one. Wider/fewer rays (default 8) survive
-    resampling down to as few as 14 dots without collapsing into a lumpy
-    gear the way many thin rays did in the original version. */
 function sunRaysVertices(numRays = 8, cx = 0.5, cy = 0.5, innerR = 0.3, outerR = 0.46) {
   const pts = [];
   for (let k = 0; k < numRays; k++) {
@@ -46,9 +167,6 @@ function sunRaysVertices(numRays = 8, cx = 0.5, cy = 0.5, innerR = 0.3, outerR =
   return pts;
 }
 
-/** N petals, each drawn as valley -> tip-left -> tip-right so the tip is a
-    short flat edge instead of a single sharp point — reads as a rounded
-    petal instead of a star point once connected. */
 function flowerVertices(numPetals = 6, cx = 0.5, cy = 0.5, innerR = 0.2, outerR = 0.42, tipSpreadDeg = 10) {
   const pts = [];
   const spread = tipSpreadDeg * Math.PI / 180;
@@ -66,14 +184,6 @@ function flowerVertices(numPetals = 6, cx = 0.5, cy = 0.5, innerR = 0.2, outerR 
 // order a pencil would trace them. The engine "closes the loop" itself by
 // drawing one extra line from the last dot back to the first once the
 // picture is finished, so every shape ends up looking whole.
-//
-// Shapes are split into two non-overlapping pools via `category` — 'numbers'
-// or 'letters' — so Connect the Dots and Connect the Dots ABC never draw
-// from the same set. A student who plays both back-to-back is guaranteed
-// two different pictures, not just "probably different." Each category has
-// at least 5 shapes that work even at Kindergarten's 10 dots; a couple of
-// extra shapes with finer detail (marked minPoints) join the pool only once
-// a round has enough dots to trace them cleanly.
 const CONNECT_DOTS_SHAPES = [
   // ---- numbers pool ----
   { name: 'star', category: 'numbers', vertices: (() => {
@@ -95,15 +205,10 @@ const CONNECT_DOTS_SHAPES = [
       [0.5, 0.05], [0.92, 0.9], [0.08, 0.9]
     ] },
   { name: 'leaf', category: 'numbers', vertices: [
-      // Elongated pointed oval: tip at top, stem point at bottom.
       [0.5, 0.05], [0.75, 0.25], [0.85, 0.5], [0.72, 0.75],
       [0.5, 0.95], [0.28, 0.75], [0.15, 0.5], [0.25, 0.25]
     ] },
-  // ---- numbers "challenge" shapes (join the pool once a round has 14+
-  // dots, i.e. Grade 1's default 20-dot round and Kindergarten's 1–20
-  // challenge toggle) ----
   { name: 'tree', category: 'numbers', minPoints: 14, vertices: [
-      // 3-tier fir/pine tree over a trunk (was previously a plain arrow).
       [0.5, 0.05],
       [0.65, 0.28], [0.55, 0.28],
       [0.75, 0.5], [0.6, 0.5],
@@ -111,20 +216,15 @@ const CONNECT_DOTS_SHAPES = [
       [0.12, 0.72], [0.4, 0.5], [0.25, 0.5], [0.45, 0.28], [0.35, 0.28]
     ] },
   { name: 'sailboat', category: 'numbers', minPoints: 14, vertices: [
-      // Triangular sail on a trapezoid hull; the hull "steps out" past the
-      // sail's base corners so the deck reads as a distinct line under it.
       [0.55, 0.08], [0.75, 0.65], [0.85, 0.7], [0.78, 0.9],
       [0.22, 0.9], [0.15, 0.7], [0.35, 0.65]
     ] },
   { name: 'house-chimney', category: 'numbers', minPoints: 14, vertices: [
-      // Chimney is a clean rectangular notch cut into the roofline.
       [0.15, 0.9], [0.85, 0.9], [0.85, 0.5], [0.71, 0.39], [0.71, 0.2],
       [0.63, 0.2], [0.63, 0.33], [0.5, 0.15], [0.15, 0.5]
     ] },
   { name: 'sun-rays', category: 'numbers', minPoints: 14, vertices: sunRaysVertices() },
   { name: 'fish', category: 'numbers', minPoints: 14, vertices: [
-      // Rounder body with a dorsal fin bump, a belly fin bump, and a clear
-      // forked tail (was reading as a dart/arrow before).
       [0.05, 0.5], [0.22, 0.32], [0.48, 0.2], [0.6, 0.35], [0.95, 0.22],
       [0.75, 0.5], [0.95, 0.78], [0.6, 0.65], [0.48, 0.8], [0.22, 0.68]
     ] },
@@ -150,15 +250,7 @@ const CONNECT_DOTS_SHAPES = [
       }
       return pts;
     })() },
-  // ---- letters "challenge" shapes (join the pool once a round has 14+
-  // dots, i.e. Grade 1's default 26-dot round and Kindergarten's A–Z
-  // challenge toggle) ----
   { name: 'butterfly', category: 'letters', minPoints: 14, vertices: [
-      // Big upper wings, smaller lower wings, short tail. NOTE: still the
-      // weakest shape in the set — with only 10 straight-line points it
-      // reads more like a bowtie/moth silhouette than a rounded butterfly.
-      // Bump this shape to ~16 points (see flowerVertices/sunRaysVertices
-      // for the pattern) if a more convincing butterfly is needed.
       [0.5, 0.15],
       [0.88, 0.28], [0.58, 0.42],
       [0.8, 0.58], [0.53, 0.58],
@@ -168,14 +260,10 @@ const CONNECT_DOTS_SHAPES = [
     ] },
   { name: 'flower', category: 'letters', minPoints: 14, vertices: flowerVertices() },
   { name: 'rocket', category: 'letters', minPoints: 14, vertices: [
-      // Nose cone -> body -> flared fin -> pinch back in -> flat exhaust,
-      // mirrored on the other side. No crossing lines.
       [0.5, 0.05], [0.62, 0.45], [0.85, 0.75], [0.62, 0.65],
       [0.58, 0.9], [0.42, 0.9], [0.38, 0.65], [0.15, 0.75], [0.38, 0.45]
     ] },
   { name: 'turtle', category: 'letters', minPoints: 14, vertices: [
-      // Head, domed shell, tail, two simple leg bumps (was an unrecognizable
-      // jagged blob before — simplified rather than over-detailed).
       [0.05, 0.5], [0.22, 0.22], [0.72, 0.22], [0.95, 0.5], [0.75, 0.65],
       [0.6, 0.88], [0.5, 0.68], [0.35, 0.88], [0.22, 0.65]
     ] },
@@ -186,6 +274,44 @@ const CONNECT_DOTS_SHAPES = [
       [0.78, 0.45], [0.78, 0.35], [0.84, 0.35], [0.84, 0.45], [0.92, 0.45], [0.92, 0.9]
     ] }
 ];
+
+// Friendly display names + a fill color for the "here's what you made"
+// reveal picture, keyed by the shape's internal name.
+const SHAPE_DISPLAY = {
+  star: { label: 'Star', color: '#FFC145' },
+  house: { label: 'House', color: '#E08E45' },
+  sun: { label: 'Sun', color: '#FFC145' },
+  triangle: { label: 'Triangle', color: '#7FB3D5' },
+  leaf: { label: 'Leaf', color: '#6FCF97' },
+  tree: { label: 'Tree', color: '#4F8F58' },
+  sailboat: { label: 'Sailboat', color: '#5DADE2' },
+  'house-chimney': { label: 'House', color: '#E08E45' },
+  'sun-rays': { label: 'Sun', color: '#FFC145' },
+  fish: { label: 'Fish', color: '#F2994A' },
+  heart: { label: 'Heart', color: '#EB5757' },
+  kite: { label: 'Kite', color: '#BB6BD9' },
+  hexagon: { label: 'Hexagon', color: '#56CCF2' },
+  pentagon: { label: 'Pentagon', color: '#9B51E0' },
+  egg: { label: 'Egg', color: '#F2C94C' },
+  butterfly: { label: 'Butterfly', color: '#F2994A' },
+  flower: { label: 'Flower', color: '#EB5757' },
+  rocket: { label: 'Rocket', color: '#5DADE2' },
+  turtle: { label: 'Turtle', color: '#27AE60' },
+  castle: { label: 'Castle', color: '#9B51E0' }
+};
+
+/** Builds a filled SVG (as an HTML string) of a shape's vertices, for the
+    "here's your finished picture" reveal — same outline the child just
+    traced, but solid and colored instead of dot-and-line. */
+function buildFilledShapeSVG(vertices, color, sizePx) {
+  const path = vertices.map(([x, y], i) =>
+    `${i === 0 ? 'M' : 'L'} ${(x * 100).toFixed(1)},${(y * 100).toFixed(1)}`
+  ).join(' ') + ' Z';
+  return `
+    <svg viewBox="0 0 100 100" width="${sizePx}" height="${sizePx}" xmlns="http://www.w3.org/2000/svg">
+      <path d="${path}" fill="${color}" stroke="#2F5D50" stroke-width="2" stroke-linejoin="round"/>
+    </svg>`;
+}
 
 /** Evenly resamples a closed polygon (by arc length) into exactly n points,
     starting exactly at vertices[0]. Works for any n, so the same shape
@@ -218,16 +344,12 @@ function resampleClosedPolygon(vertices, n) {
 
 const ConnectDotsEngine = {
   mount(container, config, api) {
-    // Most grades just get a single fixed sequence. Where config.levels is
-    // given (Kindergarten's two Connect the Dots games), a small toggle lets
-    // a student who's ready go past the grade's default range — 10 to 20,
-    // or A–J to A–Z — without needing a whole separate tile on the shelf.
     let sequence = config.sequence || [];
     const hasLevels = Array.isArray(config.levels) && config.levels.length > 1;
 
     container.innerHTML = `
       ${hasLevels ? '<div class="toolbar level-picker" aria-label="Choose a range"></div>' : ''}
-      <div class="stage" aria-label="Connect the dots stage" style="min-height:560px;"></div>
+      <div class="stage" aria-label="Connect the dots stage" style="min-height:560px; position:relative;"></div>
       <p class="status-line"></p>
     `;
     const stage = container.querySelector('.stage');
@@ -244,27 +366,18 @@ const ConnectDotsEngine = {
 
     let positions = [];
     let nextIndex = 0;
+    let currentShape = null;
 
     function layout() {
       const w = stage.clientWidth || 600;
       const h = stage.clientHeight || 440;
-      // Genuinely random each time (Math.random, not a fixed seed) so
-      // "New picture" actually changes the picture. Two filters narrow the
-      // pool: category keeps the numbers game and the letters game drawing
-      // from entirely separate shapes (so playing both never repeats a
-      // picture), and minPoints excludes shapes whose thin details would
-      // collapse into a blob on a short sequence (like Kindergarten's 10 dots).
       const category = /^[0-9]+$/.test(String(sequence[0])) ? 'numbers' : 'letters';
       const eligibleShapes = CONNECT_DOTS_SHAPES.filter(s =>
         s.category === category && (!s.minPoints || sequence.length >= s.minPoints)
       );
-      const shape = eligibleShapes[Math.floor(Math.random() * eligibleShapes.length)];
-      const rawPoints = resampleClosedPolygon(shape.vertices, sequence.length);
+      currentShape = eligibleShapes[Math.floor(Math.random() * eligibleShapes.length)];
+      const rawPoints = resampleClosedPolygon(currentShape.vertices, sequence.length);
 
-      // Fit the normalized 0–1 shape into the stage, using nearly the whole
-      // area (just enough padding to keep dot circles from clipping at the
-      // edges). A bigger shape means longer mouse travel between
-      // consecutive dots — more fine-motor practice per click.
       const padX = Math.max(24, w * 0.05);
       const padY = Math.max(24, h * 0.05);
       const usableW = w - padX * 2;
@@ -298,8 +411,6 @@ const ConnectDotsEngine = {
         drawSegment(positions[i - 1], positions[i]);
       }
       if (closeLoop && positions.length > 1) {
-        // One extra line from the last dot back to the first, so the
-        // finished picture reads as a whole shape rather than an open path.
         drawSegment(positions[positions.length - 1], positions[0]);
       }
     }
@@ -316,6 +427,33 @@ const ConnectDotsEngine = {
       svg.appendChild(line);
     }
 
+    function showRevealCard() {
+      stage.querySelectorAll('.reveal-card').forEach(el => el.remove());
+      const display = SHAPE_DISPLAY[currentShape.name] || { label: currentShape.name, color: '#2F5D50' };
+
+      const card = document.createElement('div');
+      card.className = 'reveal-card';
+      Object.assign(card.style, {
+        position: 'absolute', top: '12px', left: '50%', transform: 'translateX(-50%)',
+        background: '#fff', borderRadius: '16px', padding: '10px 16px',
+        display: 'flex', alignItems: 'center', gap: '10px',
+        boxShadow: '0 3px 12px rgba(0,0,0,0.25)', zIndex: '5'
+      });
+      card.innerHTML = `
+        <span style="font-size:26px;">${config.revealEmoji || '⭐'}</span>
+        <span style="display:inline-flex;">${buildFilledShapeSVG(currentShape.vertices, display.color, 56)}</span>
+        <span style="font-weight:700; font-size:16px;">You made a ${display.label}!</span>
+      `;
+      stage.appendChild(card);
+
+      // The small reveal picture itself is the enlargeable thumbnail.
+      const thumb = card.querySelector('span:nth-child(2)');
+      attachEnlargeOnDoubleClick(thumb, {
+        buildEnlargedHTML: () => buildFilledShapeSVG(currentShape.vertices, display.color, 320),
+        label: `You made a ${display.label}!`
+      });
+    }
+
     function handleClick(i) {
       if (i === nextIndex) {
         nextIndex++;
@@ -323,18 +461,8 @@ const ConnectDotsEngine = {
         drawLines(finished);
         render();
         if (finished) {
-          status.innerHTML = `<span class="celebrate">🎉 All connected! ${config.revealEmoji || '⭐'}</span>`;
-          if (config.revealEmoji) {
-            const reveal = document.createElement('div');
-            reveal.textContent = config.revealEmoji;
-            reveal.style.position = 'absolute';
-            reveal.style.left = '8px';
-            reveal.style.top = '8px';
-            reveal.style.fontSize = '40px';
-            reveal.style.opacity = '0.9';
-            reveal.style.pointerEvents = 'none';
-            stage.appendChild(reveal);
-          }
+          status.innerHTML = `<span class="celebrate">🎉 All connected!</span>`;
+          showRevealCard();
         } else {
           status.textContent = `Great! Now find ${positions[nextIndex].label}.`;
         }
@@ -348,17 +476,26 @@ const ConnectDotsEngine = {
     function startNewRound() {
       nextIndex = 0;
       svg.innerHTML = '';
-      stage.querySelectorAll('div').forEach(d => d.remove()); // clear any reveal sticker
+      stage.querySelectorAll('.reveal-card').forEach(el => el.remove());
       layout();
       render();
       status.textContent = sequence.length ? `Click ${positions[0].label} to start.` : '';
     }
 
-    const toolbar = document.createElement('div');
-    toolbar.className = 'toolbar';
-    toolbar.innerHTML = `<button type="button" class="restart-btn">🔄 New picture</button>`;
-    container.insertBefore(toolbar, stage);
-    toolbar.querySelector('.restart-btn').addEventListener('click', startNewRound);
+    // NEXT button: bottom-right corner of the stage, not a full-width
+    // toolbar above it.
+    const nextBtn = document.createElement('button');
+    nextBtn.type = 'button';
+    nextBtn.className = 'restart-btn';
+    nextBtn.innerHTML = 'NEXT&nbsp;&#9654;';
+    Object.assign(nextBtn.style, {
+      position: 'absolute', right: '12px', bottom: '12px', zIndex: '5',
+      fontSize: '16px', fontWeight: '700', padding: '10px 18px',
+      borderRadius: '999px', border: 'none', cursor: 'pointer',
+      background: '#2F5D50', color: '#fff', boxShadow: '0 2px 8px rgba(0,0,0,0.25)'
+    });
+    nextBtn.addEventListener('click', startNewRound);
+    stage.appendChild(nextBtn);
 
     if (hasLevels) {
       const levelPicker = container.querySelector('.level-picker');
@@ -380,7 +517,6 @@ const ConnectDotsEngine = {
       });
     }
 
-    // Give the stage a moment to receive real layout dimensions.
     requestAnimationFrame(() => {
       layout();
       render();
@@ -388,3 +524,16 @@ const ConnectDotsEngine = {
     });
   }
 };
+
+  </script>
+  <script>
+    ConnectDotsEngine.mount(document.getElementById('game'), {
+      levels: [
+        { label: '1–10', sequence: Array.from({length:10}, (_, i) => String(i+1)) },
+        { label: '1–20', sequence: Array.from({length:20}, (_, i) => String(i+1)) }
+      ],
+      revealEmoji: '🌟'
+    });
+  </script>
+</body>
+</html>
