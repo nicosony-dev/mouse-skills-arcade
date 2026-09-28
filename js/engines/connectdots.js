@@ -286,16 +286,11 @@ function buildFilledShapeSVG(vertices, color, sizePx) {
     </svg>`;
 }
 
-/** Evenly resamples a closed polygon (by arc length) into exactly n points,
-    starting exactly at vertices[0]. Works for any n, so the same shape
-    library serves a 10-dot round and a 26-dot round alike. */
-function resampleClosedPolygon(vertices, n) {
-  const edges = vertices.map((v, i) => {
-    const next = vertices[(i + 1) % vertices.length];
-    const len = Math.hypot(next[0] - v[0], next[1] - v[1]);
-    return { from: v, to: next, len };
-  });
-  const perimeter = edges.reduce((sum, e) => sum + e.len, 0);
+/** Plain arc-length resampling — used only as a fallback for the rare case
+    where a shape has more original corners than the round has dots (so not
+    every corner can get its own point). Kept separate from the main
+    function below because it does NOT guarantee corners land on a point. */
+function arcLengthResample(edges, perimeter, n) {
   const step = perimeter / n;
   const points = [];
   for (let k = 0; k < n; k++) {
@@ -312,6 +307,56 @@ function resampleClosedPolygon(vertices, n) {
       edge.from[1] + (edge.to[1] - edge.from[1]) * t
     ]);
   }
+  return points;
+}
+
+/** Resamples a closed polygon into exactly n points for n >= the number of
+    original corners (always true here — every shape's vertex count is well
+    under the smallest round size). Every original corner is always
+    included as one of the n points, and the remaining points are spread
+    along the edges in proportion to edge length. This matters: a plain
+    "evenly spaced by distance" resample (the old approach) does NOT
+    guarantee a point lands exactly on each corner, so a corner ends up
+    getting "cut" by the point just before and just after it — e.g. a
+    3-corner triangle resampled into 10 dots would visually show 5 sides
+    instead of 3, because 2 of its 3 corners got clipped this way. */
+function resampleClosedPolygon(vertices, n) {
+  const numV = vertices.length;
+  const edges = vertices.map((v, i) => {
+    const next = vertices[(i + 1) % numV];
+    const len = Math.hypot(next[0] - v[0], next[1] - v[1]);
+    return { from: v, to: next, len };
+  });
+  const perimeter = edges.reduce((sum, e) => sum + e.len, 0);
+
+  if (n <= numV) {
+    return arcLengthResample(edges, perimeter, n);
+  }
+
+  const extra = n - numV; // points left to distribute after every corner gets one
+  const raw = edges.map(e => extra * (perimeter ? e.len / perimeter : 1 / numV));
+  const counts = raw.map(Math.floor);
+  const used = counts.reduce((a, b) => a + b, 0);
+  const remainder = extra - used;
+  const order = raw
+    .map((r, i) => ({ i, frac: r - counts[i] }))
+    .sort((a, b) => b.frac - a.frac);
+  for (let k = 0; k < remainder; k++) {
+    counts[order[k % numV].i]++;
+  }
+
+  const points = [];
+  edges.forEach((edge, i) => {
+    points.push(edge.from); // the corner itself, always included
+    const extraOnEdge = counts[i];
+    for (let j = 1; j <= extraOnEdge; j++) {
+      const t = j / (extraOnEdge + 1);
+      points.push([
+        edge.from[0] + (edge.to[0] - edge.from[0]) * t,
+        edge.from[1] + (edge.to[1] - edge.from[1]) * t
+      ]);
+    }
+  });
   return points;
 }
 
