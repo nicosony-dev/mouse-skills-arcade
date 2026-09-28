@@ -58,8 +58,35 @@ const CONNECT_DOTS_SHAPES = [
       [0.05, 0.5], [0.25, 0.25], [0.55, 0.15], [0.8, 0.25],
       [0.95, 0.5], [0.8, 0.75], [0.55, 0.85], [0.25, 0.75]
     ] },
-  { name: 'arrow', category: 'numbers', minPoints: 14, vertices: [
-      [0.5, 0.05], [0.85, 0.4], [0.65, 0.4], [0.65, 0.95], [0.35, 0.95], [0.35, 0.4], [0.15, 0.4]
+  // ---- numbers "challenge" shapes (join the pool once a round has 14+
+  // dots, i.e. Grade 1's default 20-dot round and Kindergarten's 1–20
+  // challenge toggle) ----
+  { name: 'tree', category: 'numbers', minPoints: 14, vertices: [
+      [0.5, 0.05], [0.85, 0.5], [0.6, 0.5], [0.6, 0.95], [0.4, 0.95], [0.4, 0.5], [0.15, 0.5]
+    ] },
+  { name: 'sailboat', category: 'numbers', minPoints: 14, vertices: [
+      [0.05, 0.82], [0.5, 0.95], [0.95, 0.82], [0.55, 0.82], [0.55, 0.15], [0.2, 0.78]
+    ] },
+  { name: 'house-chimney', category: 'numbers', minPoints: 14, vertices: [
+      [0.15, 0.9], [0.85, 0.9], [0.85, 0.5], [0.745, 0.395], [0.745, 0.245],
+      [0.6575, 0.1575], [0.6575, 0.3075], [0.5, 0.15], [0.15, 0.5]
+    ] },
+  { name: 'sun-rays', category: 'numbers', minPoints: 14, vertices: (() => {
+      // A denser base circle (40 points) with a modest ray bump every 10th
+      // point — arc-length resampling naturally favors long edges, so a
+      // coarser polygon here would collapse into a plain diamond by the
+      // time it's resampled down to 20 dots.
+      const pts = [];
+      for (let k = 0; k < 40; k++) {
+        const angle = -Math.PI / 2 + k * (2 * Math.PI / 40);
+        const r = k % 10 === 0 ? 0.44 : 0.34;
+        pts.push([0.5 + r * Math.cos(angle), 0.5 + r * Math.sin(angle)]);
+      }
+      return pts;
+    })() },
+  { name: 'fish', category: 'numbers', minPoints: 14, vertices: [
+      [0.05, 0.5], [0.25, 0.3], [0.5, 0.22], [0.68, 0.3], [0.95, 0.15],
+      [0.78, 0.5], [0.95, 0.85], [0.68, 0.7], [0.5, 0.78], [0.25, 0.7]
     ] },
 
   // ---- letters pool ----
@@ -83,8 +110,33 @@ const CONNECT_DOTS_SHAPES = [
       }
       return pts;
     })() },
-  { name: 'tree', category: 'letters', minPoints: 14, vertices: [
-      [0.5, 0.05], [0.85, 0.5], [0.6, 0.5], [0.6, 0.95], [0.4, 0.95], [0.4, 0.5], [0.15, 0.5]
+  // ---- letters "challenge" shapes (join the pool once a round has 14+
+  // dots, i.e. Grade 1's default 26-dot round and Kindergarten's A–Z
+  // challenge toggle) ----
+  { name: 'butterfly', category: 'letters', minPoints: 14, vertices: [
+      [0.5, 0.15], [0.92, 0.35], [0.6, 0.55], [0.5, 0.88], [0.4, 0.55], [0.08, 0.35]
+    ] },
+  { name: 'flower', category: 'letters', minPoints: 14, vertices: (() => {
+      const pts = [];
+      for (let k = 0; k < 12; k++) {
+        const angle = -Math.PI / 2 + k * (2 * Math.PI / 12);
+        const r = k % 2 === 0 ? 0.42 : 0.22;
+        pts.push([0.5 + r * Math.cos(angle), 0.5 + r * Math.sin(angle)]);
+      }
+      return pts;
+    })() },
+  { name: 'rocket', category: 'letters', minPoints: 14, vertices: [
+      [0.5, 0.05], [0.62, 0.5], [0.88, 0.92], [0.58, 0.78], [0.42, 0.78], [0.12, 0.92], [0.38, 0.5]
+    ] },
+  { name: 'turtle', category: 'letters', minPoints: 14, vertices: [
+      [0.05, 0.5], [0.22, 0.4], [0.35, 0.18], [0.65, 0.18], [0.85, 0.4], [0.7, 0.52],
+      [0.95, 0.55], [0.7, 0.6], [0.6, 0.92], [0.5, 0.72], [0.3, 0.92], [0.22, 0.6]
+    ] },
+  { name: 'castle', category: 'letters', minPoints: 14, vertices: [
+      [0.08, 0.9], [0.08, 0.45], [0.16, 0.45], [0.16, 0.35], [0.24, 0.35], [0.24, 0.45],
+      [0.3, 0.45], [0.3, 0.65], [0.42, 0.65], [0.42, 0.3], [0.47, 0.3], [0.47, 0.18],
+      [0.53, 0.18], [0.53, 0.3], [0.58, 0.3], [0.58, 0.65], [0.7, 0.65], [0.7, 0.45],
+      [0.78, 0.45], [0.78, 0.35], [0.84, 0.35], [0.84, 0.45], [0.92, 0.45], [0.92, 0.9]
     ] }
 ];
 
