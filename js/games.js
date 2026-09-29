@@ -40,7 +40,7 @@ const GAME_REGISTRY = {
         ] }
     },
     {
-      title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
+      title: 'Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
       engine: 'paint', config: { brushSizes: [10, 18, 28] }
     },
     {
