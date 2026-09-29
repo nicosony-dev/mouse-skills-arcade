@@ -79,15 +79,19 @@ const TangramEngine = {
         el.style.transform = `rotate(${rotation}deg)`;
       }
 
-      el.addEventListener('click', (ev) => {
-        if (el.dataset.locked === 'true') return;
-        rotation = (rotation + 45) % 360;
-        applyRotation();
-        checkFit();
-      });
-
       makeDraggable(el, stage, {
-        onEnd: () => checkFit()
+        onEnd: () => checkFit(),
+        // A tap (press-and-release without dragging) rotates the piece
+        // 45°. This is handled directly by the drag helper rather than a
+        // native 'click' listener, since preventDefault() on pointerdown
+        // (needed for smooth dragging) can unreliably suppress the
+        // browser's synthesized click in some browsers/input types.
+        onTap: () => {
+          if (el.dataset.locked === 'true') return;
+          rotation = (rotation + 45) % 360;
+          applyRotation();
+          checkFit();
+        }
       });
 
       function checkFit() {
