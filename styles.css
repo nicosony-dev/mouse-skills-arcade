@@ -435,6 +435,14 @@ a { color: inherit; }
 }
 .tangram-piece.locked { cursor: default; filter: drop-shadow(0 0 0 var(--chalk-green)); }
 
+/* Bubble pop math */
+.bubble-stage .bubble:hover {
+  transform: scale(1.06);
+}
+.bubble-stage .bubble:active {
+  transform: scale(0.94);
+}
+
 /* For Educators page */
 .edu-wrap {
   max-width: 800px;
