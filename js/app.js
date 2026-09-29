@@ -11,7 +11,8 @@ const ENGINES = {
   pixelart: PixelArtEngine,
   magnets: MagnetsEngine,
   geomap: GeoMapEngine,
-  match: MatchEngine
+  match: MatchEngine,
+  bubblemath: BubbleMathEngine
 };
 
 const app = document.getElementById('app');
