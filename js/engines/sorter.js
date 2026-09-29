@@ -69,6 +69,26 @@ const SorterEngine = {
       });
     }
 
+    // Some item sets (like coins of different denominations) look identical
+    // as plain emoji, forcing kids to hover and read a tooltip to tell them
+    // apart. When an item has a `color`, render it as a colored token
+    // showing its own label text directly, instead of a generic emoji.
+    function styleAsToken(el, item) {
+      if (!item.color) return;
+      el.textContent = item.tokenText || item.label;
+      el.style.background = item.color;
+      el.style.color = '#FBF6EC';
+      el.style.borderRadius = '50%';
+      el.style.width = (item.tokenSize || 56) + 'px';
+      el.style.height = (item.tokenSize || 56) + 'px';
+      el.style.display = 'flex';
+      el.style.alignItems = 'center';
+      el.style.justifyContent = 'center';
+      el.style.fontSize = '0.85rem';
+      el.style.fontWeight = '800';
+      el.style.padding = '0';
+    }
+
     function refreshTray() {
       tray.innerHTML = '';
       items.forEach((item, idx) => {
@@ -78,6 +98,7 @@ const SorterEngine = {
         el.textContent = item.emoji;
         el.title = item.label;
         el.dataset.idx = idx;
+        styleAsToken(el, item);
         tray.appendChild(el);
         attachDrag(el, item, idx);
       });
@@ -94,6 +115,7 @@ const SorterEngine = {
         ghost = document.createElement('div');
         ghost.className = 'tray-item';
         ghost.textContent = item.emoji;
+        styleAsToken(ghost, item);
         ghost.style.position = 'fixed';
         ghost.style.zIndex = '999';
         ghost.style.pointerEvents = 'none';
