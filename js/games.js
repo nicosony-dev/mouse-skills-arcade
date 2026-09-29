@@ -59,7 +59,7 @@ const GAME_REGISTRY = {
       title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings onto your pizza!',
       engine: 'builder', config: { sceneEmoji: '🍕', sceneLabel: 'pizza', maxPlacements: 8,
         items: [{ id: 'pep', emoji: '🔴', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
-                { id: 'pepper', emoji: '🫑', label: 'Pepper' }, { id: 'cheese', emoji: '🧀', label: 'Extra cheese' }] }
+                { id: 'pepper', emoji: '🟢', label: 'Pepper slice' }, { id: 'cheese', emoji: '🟡', label: 'Cheese sprinkle' }] }
     },
     {
       title: 'Make a Face', icon: '🙂', skill: 'Drag eyes, a nose, a mouth, and hair to build a silly face!',
@@ -118,8 +118,8 @@ const GAME_REGISTRY = {
     { title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings onto your pizza!',
       engine: 'builder', config: { sceneEmoji: '🍕', sceneLabel: 'pizza', maxPlacements: 12,
         items: [{ id: 'pep', emoji: '🔴', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
-                { id: 'pepper', emoji: '🫑', label: 'Pepper' }, { id: 'mushroom', emoji: '🍄', label: 'Mushroom' },
-                { id: 'cheese', emoji: '🧀', label: 'Extra cheese' }] } },
+                { id: 'pepper', emoji: '🟢', label: 'Pepper slice' }, { id: 'mushroom', emoji: '🟤', label: 'Mushroom slice' },
+                { id: 'cheese', emoji: '🟡', label: 'Cheese sprinkle' }] } },
     { title: 'Make a Cookie', icon: '🍪', skill: 'Drag chocolate chips, icing, and nuts onto your cookie!',
       engine: 'builder', config: { sceneEmoji: '🍪', sceneLabel: 'cookie', maxPlacements: 12,
         items: [{ id: 'choc', emoji: '🟤', label: 'Chocolate chip' }, { id: 'icing', emoji: '⚪', label: 'Icing dot' },
@@ -174,8 +174,8 @@ const GAME_REGISTRY = {
     { title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings like pepperoni, mushrooms, and pineapple onto your pizza!',
       engine: 'builder', config: { sceneEmoji: '🍕', sceneLabel: 'pizza', maxPlacements: 16,
         items: [{ id: 'pep', emoji: '🔴', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
-                { id: 'pepper', emoji: '🫑', label: 'Pepper' }, { id: 'mushroom', emoji: '🍄', label: 'Mushroom' },
-                { id: 'cheese', emoji: '🧀', label: 'Extra cheese' }, { id: 'pineapple', emoji: '🍍', label: 'Pineapple' }] } },
+                { id: 'pepper', emoji: '🟢', label: 'Pepper slice' }, { id: 'mushroom', emoji: '🟤', label: 'Mushroom slice' },
+                { id: 'cheese', emoji: '🟡', label: 'Cheese sprinkle' }, { id: 'pineapple', emoji: '🟠', label: 'Pineapple chunk' }] } },
     { title: 'Tangrams', icon: '🔺', skill: 'Drag and turn the shapes so they fit on their shadow!',
       engine: 'tangram', config: { tolerancePx: 34, toleranceDeg: 20, pieces: [
         { shape: 'triLg', color: '#4FA8D8', target: { x: 26, y: 32, rotation: 0 } },
@@ -255,8 +255,8 @@ const GAME_REGISTRY = {
     { title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings like pepperoni, mushrooms, and pineapple onto your pizza!',
       engine: 'builder', config: { sceneEmoji: '🍕', sceneLabel: 'pizza', maxPlacements: 20,
         items: [{ id: 'pep', emoji: '🔴', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
-                { id: 'pepper', emoji: '🫑', label: 'Pepper' }, { id: 'mushroom', emoji: '🍄', label: 'Mushroom' },
-                { id: 'cheese', emoji: '🧀', label: 'Extra cheese' }, { id: 'pineapple', emoji: '🍍', label: 'Pineapple' },
+                { id: 'pepper', emoji: '🟢', label: 'Pepper slice' }, { id: 'mushroom', emoji: '🟤', label: 'Mushroom slice' },
+                { id: 'cheese', emoji: '🟡', label: 'Cheese sprinkle' }, { id: 'pineapple', emoji: '🟠', label: 'Pineapple chunk' },
                 { id: 'basil', emoji: '🌿', label: 'Basil' }] } },
     { title: 'Make a Robot', icon: '🤖', skill: 'Drag arms, eyes, antennas, and a jetpack to build your own robot!',
       engine: 'builder', config: { sceneEmoji: '🤖', sceneLabel: 'robot', maxPlacements: 16,
@@ -286,11 +286,21 @@ const GAME_REGISTRY = {
                 { id: 'icing', emoji: '🤍', label: 'Icing' }, { id: 'shingle', emoji: '🟫', label: 'Roof shingle' }] } },
     { title: 'Break the Bank - Counting', icon: '🐷', skill: 'Drag coins into the piggy bank until you reach the goal!',
       engine: 'sorter', config: { mode: 'count', target: 75, items: [
-        { id: 'p1', emoji: '🪙', label: 'Penny', value: 1 }, { id: 'p2', emoji: '🪙', label: 'Penny', value: 1 },
-        { id: 'n1', emoji: '🪙', label: 'Nickel', value: 5 }, { id: 'n2', emoji: '🪙', label: 'Nickel', value: 5 },
-        { id: 'd1', emoji: '🪙', label: 'Dime', value: 10 }, { id: 'd2', emoji: '🪙', label: 'Dime', value: 10 },
-        { id: 'q1', emoji: '🪙', label: 'Quarter', value: 25 }, { id: 'q2', emoji: '🪙', label: 'Quarter', value: 25 },
-        { id: 'q3', emoji: '🪙', label: 'Quarter', value: 25 }
+        // Each denomination gets its own color, size, and value printed right
+        // on the coin, so kids can tell them apart at a glance instead of
+        // needing to hover for a tooltip — every coin looked identical before.
+        // Nickel, dime, and quarter share one realistic silver tone (real
+        // US coins actually are the same metal color) — size and the
+        // printed value are what tell them apart, same as real coins.
+        { id: 'p1', label: 'Penny', tokenText: '1¢', color: '#B87333', tokenSize: 52, value: 1 },
+        { id: 'p2', label: 'Penny', tokenText: '1¢', color: '#B87333', tokenSize: 52, value: 1 },
+        { id: 'n1', label: 'Nickel', tokenText: '5¢', color: '#B8BCC0', tokenSize: 60, value: 5 },
+        { id: 'n2', label: 'Nickel', tokenText: '5¢', color: '#B8BCC0', tokenSize: 60, value: 5 },
+        { id: 'd1', label: 'Dime', tokenText: '10¢', color: '#B8BCC0', tokenSize: 42, value: 10 },
+        { id: 'd2', label: 'Dime', tokenText: '10¢', color: '#B8BCC0', tokenSize: 42, value: 10 },
+        { id: 'q1', label: 'Quarter', tokenText: '25¢', color: '#B8BCC0', tokenSize: 66, value: 25 },
+        { id: 'q2', label: 'Quarter', tokenText: '25¢', color: '#B8BCC0', tokenSize: 66, value: 25 },
+        { id: 'q3', label: 'Quarter', tokenText: '25¢', color: '#B8BCC0', tokenSize: 66, value: 25 }
       ] } },
     { title: 'Litter Critters', icon: '♻️', skill: 'Drag each piece of trash into the bin where it belongs!',
       engine: 'sorter', config: { mode: 'sort', easyHardToggle: true,
