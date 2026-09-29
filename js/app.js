@@ -30,7 +30,7 @@ function renderHome() {
     <div class="shelf-wrap">
       <div class="shelf-intro">
         <h2>Pick a grade, then pick a game</h2>
-        <p>Every game here is free, ad-free, and works with just a mouse, trackpad, or touchscreen —
+        <p>Every game works with just a mouse, trackpad, or touchscreen —
         click, drag, and drop are all you need. Pick a shelf below to get started.</p>
       </div>
       <div class="grade-picker" role="tablist" aria-label="Grade level"></div>
