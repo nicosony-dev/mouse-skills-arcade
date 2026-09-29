@@ -10,11 +10,21 @@
  *   onStart(el, ev)
  *   onMove(el, x, y, ev)   x/y are the element's new top-left, in stage coords
  *   onEnd(el, x, y, ev)
+ *   onTap(el, ev)          fires on pointerup when the press moved less than
+ *                          tapThresholdPx — a "click" without the ambiguity
+ *                          of whether the browser's native click event still
+ *                          fires after preventDefault() on pointerdown (it
+ *                          doesn't, reliably, in every browser/input type)
+ *   onDoubleTap(el, ev)    fires instead of onTap when two taps land within
+ *                          350ms of each other — a 'dblclick' replacement
+ *                          for the same reason as onTap above
+ *   tapThresholdPx: number (default 6)
  *   bounds: boolean - if true, keeps the element fully inside the stage
  */
 function makeDraggable(el, stageEl, options) {
   options = options || {};
-  let startX = 0, startY = 0, origX = 0, origY = 0, dragging = false;
+  const tapThreshold = options.tapThresholdPx || 6;
+  let startX = 0, startY = 0, origX = 0, origY = 0, dragging = false, moved = false, lastTapTime = 0;
 
   el.style.touchAction = 'none';
 
@@ -30,6 +40,7 @@ function makeDraggable(el, stageEl, options) {
     // Only primary button for mouse
     if (ev.button !== undefined && ev.button !== 0) return;
     dragging = true;
+    moved = false;
     el.setPointerCapture && el.setPointerCapture(ev.pointerId);
     startX = ev.clientX;
     startY = ev.clientY;
@@ -47,6 +58,7 @@ function makeDraggable(el, stageEl, options) {
     if (!dragging) return;
     const dx = ev.clientX - startX;
     const dy = ev.clientY - startY;
+    if (Math.hypot(dx, dy) > tapThreshold) moved = true;
     let newX = origX + dx;
     let newY = origY + dy;
     if (options.bounds) {
@@ -69,6 +81,16 @@ function makeDraggable(el, stageEl, options) {
     const finalX = rect.left - sRect.left;
     const finalY = rect.top - sRect.top;
     if (options.onEnd) options.onEnd(el, finalX, finalY, ev);
+    if (!moved) {
+      const now = Date.now();
+      if (now - lastTapTime < 350 && options.onDoubleTap) {
+        options.onDoubleTap(el, ev);
+        lastTapTime = 0; // avoid a third quick tap chaining into another double-tap
+      } else {
+        lastTapTime = now;
+        if (options.onTap) options.onTap(el, ev);
+      }
+    }
   }
 
   el.addEventListener('pointerdown', onPointerDown);
