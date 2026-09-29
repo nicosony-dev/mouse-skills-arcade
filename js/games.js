@@ -1,139 +1,314 @@
-/* app.js — the shell around the game registry.
-   Renders the home "shelf" screen, routes into a chosen game, and renders
-   the For Educators standards page.
+/* games.js — the full game registry.
+   Each grade lists its games EXACTLY as named in the district's request.
+   Repeated titles (Tangrams, ABCya Paint, Make a Pizza, etc.) reuse one
+   engine each, but with a harder/bigger configuration at each grade level,
+   per your instruction to "build once, scale difficulty per grade."
 */
-const ENGINES = {
-  builder: BuilderEngine,
-  sorter: SorterEngine,
-  connectdots: ConnectDotsEngine,
-  paint: PaintEngine,
-  tangram: TangramEngine,
-  pixelart: PixelArtEngine,
-  magnets: MagnetsEngine,
-  geomap: GeoMapEngine,
-  match: MatchEngine,
-  bubblemath: BubbleMathEngine
+const GAME_REGISTRY = {
+  K: [
+    {
+      title: 'Make a House', icon: '🏠', skill: 'Drag doors, windows, trees, and more onto your house!',
+      engine: 'builder', config: { sceneEmoji: '🏠', sceneLabel: 'house', maxPlacements: 8,
+        items: [
+          { id: 'door', emoji: '🚪', label: 'Door' }, { id: 'window', emoji: '🪟', label: 'Window' },
+          { id: 'tree', emoji: '🌳', label: 'Tree' }, { id: 'flower', emoji: '🌷', label: 'Flower' },
+          { id: 'sun', emoji: '☀️', label: 'Sun' }
+        ] }
+    },
+    {
+      title: 'ABC and 123 Magnets', icon: '🧲', skill: 'Drag letters and numbers around the board!',
+      engine: 'magnets', config: { tileSet: 'letters' }
+    },
+    {
+      title: 'Connect the Dots', icon: '🔢', skill: 'Click the numbers in order to find the hidden picture!',
+      engine: 'connectdots', config: { sequence: Array.from({ length: 10 }, (_, i) => String(i + 1)), revealEmoji: '⭐',
+        // Kindergartners who are ready to count past 10 can switch to the
+        // 1–20 range right in the game, without needing a separate tile.
+        levels: [
+          { label: '1–10', sequence: Array.from({ length: 10 }, (_, i) => String(i + 1)) },
+          { label: '1–20 (challenge)', sequence: Array.from({ length: 20 }, (_, i) => String(i + 1)) }
+        ] }
+    },
+    {
+      title: 'Connect the Dots ABC', icon: '🔤', skill: 'Click the letters in order to find the hidden picture!',
+      engine: 'connectdots', config: { sequence: 'ABCDEFGHIJ'.split(''), revealEmoji: '🌈',
+        // Kindergartners who already know their ABCs past J can switch to
+        // the full A–Z range right in the game.
+        levels: [
+          { label: 'A–J', sequence: 'ABCDEFGHIJ'.split('') },
+          { label: 'A–Z (challenge)', sequence: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('') }
+        ] }
+    },
+    {
+      title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
+      engine: 'paint', config: { brushSizes: [10, 18, 28] }
+    },
+    {
+      title: 'Make a Cake', icon: '🎂', skill: 'Drag candles, cherries, and sprinkles onto your cake!',
+      engine: 'builder', config: { sceneEmoji: '🎂', sceneLabel: 'cake', maxPlacements: 8,
+        items: [{ id: 'candle', emoji: '🕯️', label: 'Candle' }, { id: 'cherry', emoji: '🍒', label: 'Cherry' },
+                { id: 'star', emoji: '⭐', label: 'Sprinkle star' }, { id: 'heart', emoji: '💖', label: 'Heart' }] }
+    },
+    {
+      title: 'Make a Cookie', icon: '🍪', skill: 'Drag chocolate chips and sprinkles onto your cookie!',
+      engine: 'builder', config: { sceneEmoji: '🍪', sceneLabel: 'cookie', maxPlacements: 10,
+        items: [{ id: 'choc', emoji: '🍫', label: 'Chocolate chip' }, { id: 'icing', emoji: '🤍', label: 'Icing dot' },
+                { id: 'sprinkle', emoji: '✨', label: 'Sprinkle' }] }
+    },
+    {
+      title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings onto your pizza!',
+      engine: 'builder', config: { sceneEmoji: '🍕', sceneLabel: 'pizza', maxPlacements: 8,
+        items: [{ id: 'pep', emoji: '🍕', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
+                { id: 'pepper', emoji: '🫑', label: 'Pepper' }, { id: 'cheese', emoji: '🧀', label: 'Extra cheese' }] }
+    },
+    {
+      title: 'Make a Face', icon: '🙂', skill: 'Drag eyes, a nose, a mouth, and hair to build a silly face!',
+      engine: 'builder', config: { sceneEmoji: '⚪', sceneLabel: 'face', maxPlacements: 7,
+        items: [{ id: 'eye', emoji: '👁️', label: 'Eye' }, { id: 'nose', emoji: '👃', label: 'Nose' },
+                { id: 'mouth', emoji: '👄', label: 'Mouth' }, { id: 'hair', emoji: '💇', label: 'Hair' }] }
+    },
+    {
+      title: 'Tangrams', icon: '🔺', skill: 'Drag and turn the shapes so they fit on their shadow!',
+      engine: 'tangram', config: { tolerancePx: 46, toleranceDeg: 30, pieces: [
+        { shape: 'triLg', color: '#4FA8D8', target: { x: 30, y: 40, rotation: 0 } },
+        { shape: 'triLg', color: '#E85D4C', target: { x: 55, y: 40, rotation: 90 } },
+        { shape: 'square', color: '#F4A825', target: { x: 42, y: 62, rotation: 0 } }
+      ] }
+    },
+    {
+      title: 'Same & Different', icon: '🍩', skill: 'Look closely, then click the one that matches!',
+      engine: 'match', config: { rounds: [
+        { mode: 'same', target: { shape: 'circle', color: '#E85D4C' }, options: [
+          { shape: 'circle', color: '#E85D4C', correct: true }, { shape: 'square', color: '#4FA8D8', correct: false }
+        ] },
+        { mode: 'same', target: { shape: 'triangle', color: '#F4A825' }, options: [
+          { shape: 'circle', color: '#F4A825', correct: false }, { shape: 'triangle', color: '#F4A825', correct: true }
+        ] },
+        { mode: 'different', target: { shape: 'square', color: '#8E6BB0' }, options: [
+          { shape: 'square', color: '#8E6BB0', correct: false }, { shape: 'circle', color: '#2F5D50', correct: true }
+        ] }
+      ] }
+    }
+  ],
+
+  1: [
+    { title: 'Make a House', icon: '🏠', skill: 'Drag doors, windows, trees, and more onto your house!',
+      engine: 'builder', config: { sceneEmoji: '🏠', sceneLabel: 'house', maxPlacements: 12,
+        items: [
+          { id: 'door', emoji: '🚪', label: 'Door' }, { id: 'window', emoji: '🪟', label: 'Window' },
+          { id: 'tree', emoji: '🌳', label: 'Tree' }, { id: 'flower', emoji: '🌷', label: 'Flower' },
+          { id: 'sun', emoji: '☀️', label: 'Sun' }, { id: 'fence', emoji: '🚧', label: 'Fence' },
+          { id: 'car', emoji: '🚗', label: 'Car' }
+        ] } },
+    { title: 'ABC and 123 Magnets', icon: '🧲', skill: 'Drag letters and numbers to spell words or build number sentences!',
+      engine: 'magnets', config: { tileSet: 'both' } },
+    { title: 'Connect the Dots', icon: '🔢', skill: 'Click the numbers in order, 1 to 20, to find the hidden picture!',
+      engine: 'connectdots', config: { sequence: Array.from({ length: 20 }, (_, i) => String(i + 1)), revealEmoji: '🚀' } },
+    { title: 'Connect the Dots ABC', icon: '🔤', skill: 'Click the letters in order, A to Z, to find the hidden picture!',
+      engine: 'connectdots', config: { sequence: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), revealEmoji: '🦄' } },
+    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+      engine: 'paint', config: {} },
+    { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
+      engine: 'paint', config: { mirrorMode: true } },
+    { title: 'Make a Cake', icon: '🎂', skill: 'Drag candles, cherries, and toppings onto your cake!',
+      engine: 'builder', config: { sceneEmoji: '🎂', sceneLabel: 'cake', maxPlacements: 12,
+        items: [{ id: 'candle', emoji: '🕯️', label: 'Candle' }, { id: 'cherry', emoji: '🍒', label: 'Cherry' },
+                { id: 'star', emoji: '⭐', label: 'Sprinkle star' }, { id: 'heart', emoji: '💖', label: 'Heart' },
+                { id: 'straw', emoji: '🍓', label: 'Strawberry' }] } },
+    { title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings onto your pizza!',
+      engine: 'builder', config: { sceneEmoji: '🍕', sceneLabel: 'pizza', maxPlacements: 12,
+        items: [{ id: 'pep', emoji: '🍕', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
+                { id: 'pepper', emoji: '🫑', label: 'Pepper' }, { id: 'mushroom', emoji: '🍄', label: 'Mushroom' },
+                { id: 'cheese', emoji: '🧀', label: 'Extra cheese' }] } },
+    { title: 'Make a Cookie', icon: '🍪', skill: 'Drag chocolate chips, icing, and nuts onto your cookie!',
+      engine: 'builder', config: { sceneEmoji: '🍪', sceneLabel: 'cookie', maxPlacements: 12,
+        items: [{ id: 'choc', emoji: '🍫', label: 'Chocolate chip' }, { id: 'icing', emoji: '🤍', label: 'Icing dot' },
+                { id: 'sprinkle', emoji: '✨', label: 'Sprinkle' }, { id: 'nut', emoji: '🥜', label: 'Nut' }] } },
+    { title: 'Make a Face', icon: '🙂', skill: 'Drag eyes, glasses, hats, and more to build a silly face!',
+      engine: 'builder', config: { sceneEmoji: '⚪', sceneLabel: 'face', maxPlacements: 10,
+        items: [{ id: 'eye', emoji: '👁️', label: 'Eye' }, { id: 'nose', emoji: '👃', label: 'Nose' },
+                { id: 'mouth', emoji: '👄', label: 'Mouth' }, { id: 'hair', emoji: '💇', label: 'Hair' },
+                { id: 'glasses', emoji: '👓', label: 'Glasses' }, { id: 'hat', emoji: '🎩', label: 'Hat' }] } },
+    { title: 'Tangrams', icon: '🔺', skill: 'Drag and turn the shapes so they fit on their shadow!',
+      engine: 'tangram', config: { tolerancePx: 40, toleranceDeg: 25, pieces: [
+        { shape: 'triLg', color: '#4FA8D8', target: { x: 28, y: 35, rotation: 0 } },
+        { shape: 'triLg', color: '#E85D4C', target: { x: 55, y: 35, rotation: 90 } },
+        { shape: 'triMd', color: '#F4A825', target: { x: 42, y: 55, rotation: 45 } },
+        { shape: 'square', color: '#8E6BB0', target: { x: 42, y: 70, rotation: 0 } },
+        { shape: 'parallelogram', color: '#2F5D50', target: { x: 65, y: 65, rotation: 0 } }
+      ] } },
+    { title: '100 Snowballs!', icon: '⛄', skill: 'Drag snowballs anywhere you want and build something fun!',
+      engine: 'builder', config: { sceneEmoji: '❄️', sceneLabel: 'snow', unlimited: true, maxPlacements: 60,
+        items: [{ id: 'snowball', emoji: '⚪', label: 'Snowball' }] } },
+    { title: 'Break the Bank - Sorting', icon: '🪙', skill: 'Drag each coin or bill into the bin where it belongs!',
+      engine: 'sorter', config: { mode: 'sort', easyHardToggle: true,
+        bins: [{ id: 'coins', emoji: '🪙', label: 'Coins' }, { id: 'bills', emoji: '💵', label: 'Bills' }],
+        items: [
+          { id: 'p1', emoji: '🪙', label: 'Penny', binId: 'coins' }, { id: 'p2', emoji: '🪙', label: 'Nickel', binId: 'coins' },
+          { id: 'p3', emoji: '🪙', label: 'Dime', binId: 'coins' }, { id: 'b1', emoji: '💵', label: 'Dollar bill', binId: 'bills' },
+          { id: 'b2', emoji: '💵', label: 'Five', binId: 'bills' }, { id: 'p4', emoji: '🪙', label: 'Quarter', binId: 'coins' }
+        ] } }
+  ],
+
+  2: [
+    { title: 'Make a House', icon: '🏠', skill: 'Drag doors, windows, trees, and more onto your house!',
+      engine: 'builder', config: { sceneEmoji: '🏠', sceneLabel: 'house', maxPlacements: 16,
+        items: [
+          { id: 'door', emoji: '🚪', label: 'Door' }, { id: 'window', emoji: '🪟', label: 'Window' },
+          { id: 'tree', emoji: '🌳', label: 'Tree' }, { id: 'flower', emoji: '🌷', label: 'Flower' },
+          { id: 'sun', emoji: '☀️', label: 'Sun' }, { id: 'fence', emoji: '🚧', label: 'Fence' },
+          { id: 'car', emoji: '🚗', label: 'Car' }, { id: 'dog', emoji: '🐕', label: 'Dog' },
+          { id: 'chimney-smoke', emoji: '💨', label: 'Chimney smoke' }
+        ] } },
+    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+      engine: 'paint', config: {} },
+    { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
+      engine: 'paint', config: { mirrorMode: true } },
+    { title: 'Pixel Art', icon: '🟪', skill: 'Click and drag across the grid to color in squares!',
+      engine: 'pixelart', config: { gridSize: 12 } },
+    { title: 'Make a Cake', icon: '🎂', skill: 'Drag candles, cherries, and toppings onto your cake!',
+      engine: 'builder', config: { sceneEmoji: '🎂', sceneLabel: 'cake', maxPlacements: 16,
+        items: [{ id: 'candle', emoji: '🕯️', label: 'Candle' }, { id: 'cherry', emoji: '🍒', label: 'Cherry' },
+                { id: 'star', emoji: '⭐', label: 'Sprinkle star' }, { id: 'heart', emoji: '💖', label: 'Heart' },
+                { id: 'straw', emoji: '🍓', label: 'Strawberry' }, { id: 'choc', emoji: '🍫', label: 'Chocolate drizzle' }] } },
+    { title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings like pepperoni, mushrooms, and pineapple onto your pizza!',
+      engine: 'builder', config: { sceneEmoji: '🍕', sceneLabel: 'pizza', maxPlacements: 16,
+        items: [{ id: 'pep', emoji: '🍕', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
+                { id: 'pepper', emoji: '🫑', label: 'Pepper' }, { id: 'mushroom', emoji: '🍄', label: 'Mushroom' },
+                { id: 'cheese', emoji: '🧀', label: 'Extra cheese' }, { id: 'pineapple', emoji: '🍍', label: 'Pineapple' }] } },
+    { title: 'Tangrams', icon: '🔺', skill: 'Drag and turn the shapes so they fit on their shadow!',
+      engine: 'tangram', config: { tolerancePx: 34, toleranceDeg: 20, pieces: [
+        { shape: 'triLg', color: '#4FA8D8', target: { x: 26, y: 32, rotation: 0 } },
+        { shape: 'triLg', color: '#E85D4C', target: { x: 55, y: 32, rotation: 90 } },
+        { shape: 'triMd', color: '#F4A825', target: { x: 40, y: 50, rotation: 45 } },
+        { shape: 'triSm', color: '#2F5D50', target: { x: 62, y: 55, rotation: 180 } },
+        { shape: 'square', color: '#8E6BB0', target: { x: 40, y: 68, rotation: 0 } },
+        { shape: 'parallelogram', color: '#2F5D50', target: { x: 62, y: 70, rotation: 0 } }
+      ] } },
+    { title: 'USA Geography Puzzle', icon: '🗺️', skill: 'Drag each state to its spot on the map!',
+      engine: 'geomap', config: { tolerancePx: 50, states: [
+        { id: 'CA', label: 'California', x: 12, y: 45 }, { id: 'TX', label: 'Texas', x: 40, y: 68 },
+        { id: 'FL', label: 'Florida', x: 78, y: 82 }, { id: 'NY', label: 'New York', x: 80, y: 25 },
+        { id: 'IL', label: 'Illinois', x: 58, y: 40 }, { id: 'WA', label: 'Washington', x: 15, y: 12 },
+        { id: 'CO', label: 'Colorado', x: 38, y: 45 }, { id: 'ME', label: 'Maine', x: 88, y: 14 }
+      ] } },
+    { title: '100 Snowballs!', icon: '⛄', skill: 'Drag snowballs anywhere you want and build something fun!',
+      engine: 'builder', config: { sceneEmoji: '❄️', sceneLabel: 'snow', unlimited: true, maxPlacements: 100,
+        items: [{ id: 'snowball', emoji: '⚪', label: 'Snowball' }] } },
+    { title: 'Break the Bank - Sorting', icon: '🪙', skill: 'Drag each coin into the bin that matches it!',
+      engine: 'sorter', config: { mode: 'sort', easyHardToggle: true,
+        bins: [{ id: 'penny', emoji: '🟤', label: 'Pennies' }, { id: 'nickel', emoji: '⚪', label: 'Nickels' },
+               { id: 'dime', emoji: '⚪', label: 'Dimes' }, { id: 'quarter', emoji: '⚪', label: 'Quarters' }],
+        items: [
+          { id: 'p1', emoji: '🪙', label: 'Penny', binId: 'penny' }, { id: 'p2', emoji: '🪙', label: 'Penny', binId: 'penny' },
+          { id: 'n1', emoji: '🪙', label: 'Nickel', binId: 'nickel' }, { id: 'n2', emoji: '🪙', label: 'Nickel', binId: 'nickel' },
+          { id: 'd1', emoji: '🪙', label: 'Dime', binId: 'dime' }, { id: 'd2', emoji: '🪙', label: 'Dime', binId: 'dime' },
+          { id: 'q1', emoji: '🪙', label: 'Quarter', binId: 'quarter' }, { id: 'q2', emoji: '🪙', label: 'Quarter', binId: 'quarter' }
+        ] } },
+    { title: 'Make a Robot', icon: '🤖', skill: 'Drag arms, eyes, and bolts to build your own robot!',
+      engine: 'builder', config: { sceneEmoji: '🤖', sceneLabel: 'robot', maxPlacements: 10,
+        items: [{ id: 'antenna', emoji: '📡', label: 'Antenna' }, { id: 'eye', emoji: '👁️', label: 'Eye' },
+                { id: 'arm', emoji: '🦾', label: 'Arm' }, { id: 'bolt', emoji: '🔩', label: 'Bolt' }] } },
+    { title: 'Make a Backpack', icon: '🎒', skill: 'Drag patches, pins, and keychains to decorate your backpack!',
+      engine: 'builder', config: { sceneEmoji: '🎒', sceneLabel: 'backpack', maxPlacements: 10,
+        items: [{ id: 'patch', emoji: '🏷️', label: 'Patch' }, { id: 'star', emoji: '⭐', label: 'Star pin' },
+                { id: 'keychain', emoji: '🔑', label: 'Keychain' }, { id: 'ribbon', emoji: '🎀', label: 'Ribbon' }] } },
+    { title: 'Create a Car', icon: '🚗', skill: 'Drag wheels, flames, and decals to build your own car!',
+      engine: 'builder', config: { sceneEmoji: '🚗', sceneLabel: 'car', maxPlacements: 10,
+        items: [{ id: 'wheel', emoji: '⚫', label: 'Wheel' }, { id: 'flame', emoji: '🔥', label: 'Flame decal' },
+                { id: 'star', emoji: '⭐', label: 'Star decal' }, { id: 'flag', emoji: '🏁', label: 'Racing flag' }] } }
+  ],
+
+  3: [
+    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+      engine: 'paint', config: {} },
+    { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
+      engine: 'paint', config: { mirrorMode: true } },
+    { title: 'Pixel Art', icon: '🟪', skill: 'Click and drag across the grid to color in squares!',
+      engine: 'pixelart', config: { gridSize: 16 } },
+    { title: 'Animate', icon: '🎞️', skill: 'Draw a picture, then draw a new frame with small changes. Press Play to watch it move!',
+      engine: 'paint', config: { frames: true, frameCount: 6 } },
+    { title: '100 Snowballs!', icon: '⛄', skill: 'Drag snowballs anywhere you want and build something fun!',
+      engine: 'builder', config: { sceneEmoji: '❄️', sceneLabel: 'snow', unlimited: true, maxPlacements: 100,
+        items: [{ id: 'snowball', emoji: '⚪', label: 'Snowball' }, { id: 'ice', emoji: '🧊', label: 'Ice block' }] } },
+    { title: 'Tangrams', icon: '🔺', skill: 'Drag and turn the shapes so they fit on their shadow!',
+      engine: 'tangram', config: { tolerancePx: 28, toleranceDeg: 15, pieces: [
+        { shape: 'triLg', color: '#4FA8D8', target: { x: 25, y: 30, rotation: 0 } },
+        { shape: 'triLg', color: '#E85D4C', target: { x: 55, y: 30, rotation: 90 } },
+        { shape: 'triMd', color: '#F4A825', target: { x: 38, y: 48, rotation: 45 } },
+        { shape: 'triSm', color: '#2F5D50', target: { x: 60, y: 52, rotation: 180 } },
+        { shape: 'triSm', color: '#8E6BB0', target: { x: 70, y: 40, rotation: 270 } },
+        { shape: 'square', color: '#8E6BB0', target: { x: 38, y: 66, rotation: 0 } },
+        { shape: 'parallelogram', color: '#2F5D50', target: { x: 60, y: 68, rotation: 0 } }
+      ] } },
+    { title: 'Bubble Pop Math', icon: '🫧', skill: 'Pop the bubbles that match the answer!',
+      engine: 'bubblemath', config: {
+        minOperand: 2, maxOperand: 15, minTarget: 8, maxTarget: 25,
+        correctPerRound: 3, distractorCount: 7
+      } },
+    { title: 'Make a Face', icon: '🙂', skill: 'Drag eyes, hats, glasses, and more to build a silly face!',
+      engine: 'builder', config: { sceneEmoji: '⚪', sceneLabel: 'face', maxPlacements: 16,
+        items: [{ id: 'eye', emoji: '👁️', label: 'Eye' }, { id: 'nose', emoji: '👃', label: 'Nose' },
+                { id: 'mouth', emoji: '👄', label: 'Mouth' }, { id: 'hair', emoji: '💇', label: 'Hair' },
+                { id: 'glasses', emoji: '👓', label: 'Glasses' }, { id: 'hat', emoji: '🎩', label: 'Hat' },
+                { id: 'mustache', emoji: '👨', label: 'Mustache' }, { id: 'earring', emoji: '💎', label: 'Earring' }] } },
+    { title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings like pepperoni, mushrooms, and pineapple onto your pizza!',
+      engine: 'builder', config: { sceneEmoji: '🍕', sceneLabel: 'pizza', maxPlacements: 20,
+        items: [{ id: 'pep', emoji: '🍕', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
+                { id: 'pepper', emoji: '🫑', label: 'Pepper' }, { id: 'mushroom', emoji: '🍄', label: 'Mushroom' },
+                { id: 'cheese', emoji: '🧀', label: 'Extra cheese' }, { id: 'pineapple', emoji: '🍍', label: 'Pineapple' },
+                { id: 'basil', emoji: '🌿', label: 'Basil' }] } },
+    { title: 'Make a Robot', icon: '🤖', skill: 'Drag arms, eyes, antennas, and a jetpack to build your own robot!',
+      engine: 'builder', config: { sceneEmoji: '🤖', sceneLabel: 'robot', maxPlacements: 16,
+        items: [{ id: 'antenna', emoji: '📡', label: 'Antenna' }, { id: 'eye', emoji: '👁️', label: 'Eye' },
+                { id: 'arm', emoji: '🦾', label: 'Arm' }, { id: 'bolt', emoji: '🔩', label: 'Bolt' },
+                { id: 'jetpack', emoji: '🚀', label: 'Jetpack' }, { id: 'claw', emoji: '🦞', label: 'Claw' }] } },
+    { title: 'Make a Backpack', icon: '🎒', skill: 'Drag patches, pins, and keychains to decorate your backpack!',
+      engine: 'builder', config: { sceneEmoji: '🎒', sceneLabel: 'backpack', maxPlacements: 16,
+        items: [{ id: 'patch', emoji: '🏷️', label: 'Patch' }, { id: 'star', emoji: '⭐', label: 'Star pin' },
+                { id: 'keychain', emoji: '🔑', label: 'Keychain' }, { id: 'ribbon', emoji: '🎀', label: 'Ribbon' },
+                { id: 'button', emoji: '🔘', label: 'Button pin' }] } },
+    { title: 'Make a Treehouse', icon: '🌳', skill: 'Drag planks, a ladder, and a flag to build your treehouse!',
+      engine: 'builder', config: { sceneEmoji: '🌳', sceneLabel: 'treehouse', maxPlacements: 14,
+        items: [{ id: 'plank', emoji: '🟫', label: 'Plank' }, { id: 'ladder', emoji: '🪜', label: 'Rope ladder' },
+                { id: 'flag', emoji: '🚩', label: 'Flag' }, { id: 'window', emoji: '🪟', label: 'Window' }] } },
+    { title: 'Pumpkin Carving', icon: '🎃', skill: 'Drag eyes and a mouth onto the pumpkin to carve a silly face!',
+      engine: 'builder', config: { sceneEmoji: '🎃', sceneLabel: 'pumpkin', maxPlacements: 6,
+        items: [{ id: 'tri-eye', emoji: '🔺', label: 'Triangle eye' }, { id: 'mouth', emoji: '⬛', label: 'Jagged mouth' },
+                { id: 'nose', emoji: '🔻', label: 'Nose' }] } },
+    { title: 'Make a Christmas Tree', icon: '🎄', skill: 'Drag ornaments, lights, and a star to decorate your tree!',
+      engine: 'builder', config: { sceneEmoji: '🎄', sceneLabel: 'tree', maxPlacements: 16,
+        items: [{ id: 'orn', emoji: '🔴', label: 'Ornament' }, { id: 'star', emoji: '⭐', label: 'Star topper' },
+                { id: 'light', emoji: '💡', label: 'Light' }, { id: 'candy', emoji: '🍬', label: 'Candy cane' }] } },
+    { title: 'Make a Gingerbread House', icon: '🏠', skill: 'Drag candy and icing to decorate your gingerbread house!',
+      engine: 'builder', config: { sceneEmoji: '🍫', sceneLabel: 'gingerbread house', maxPlacements: 16,
+        items: [{ id: 'gumdrop', emoji: '🍬', label: 'Gumdrop' }, { id: 'candycane', emoji: '🍭', label: 'Candy cane' },
+                { id: 'icing', emoji: '🤍', label: 'Icing' }, { id: 'shingle', emoji: '🟫', label: 'Roof shingle' }] } },
+    { title: 'Break the Bank - Counting', icon: '🐷', skill: 'Drag coins into the piggy bank until you reach the goal!',
+      engine: 'sorter', config: { mode: 'count', target: 75, items: [
+        { id: 'p1', emoji: '🪙', label: 'Penny', value: 1 }, { id: 'p2', emoji: '🪙', label: 'Penny', value: 1 },
+        { id: 'n1', emoji: '🪙', label: 'Nickel', value: 5 }, { id: 'n2', emoji: '🪙', label: 'Nickel', value: 5 },
+        { id: 'd1', emoji: '🪙', label: 'Dime', value: 10 }, { id: 'd2', emoji: '🪙', label: 'Dime', value: 10 },
+        { id: 'q1', emoji: '🪙', label: 'Quarter', value: 25 }, { id: 'q2', emoji: '🪙', label: 'Quarter', value: 25 },
+        { id: 'q3', emoji: '🪙', label: 'Quarter', value: 25 }
+      ] } },
+    { title: 'Litter Critters', icon: '♻️', skill: 'Drag each piece of trash into the bin where it belongs!',
+      engine: 'sorter', config: { mode: 'sort', easyHardToggle: true,
+        bins: [{ id: 'recycle', emoji: '♻️', label: 'Recyclables' }, { id: 'compost', emoji: '🍎', label: 'Compost' },
+               { id: 'ewaste', emoji: '🔋', label: 'E-Waste' }, { id: 'landfill', emoji: '🗑️', label: 'Landfill' }],
+        items: [
+          { id: 'bottle', emoji: '🍾', label: 'Bottle', binId: 'recycle' }, { id: 'can', emoji: '🥫', label: 'Can', binId: 'recycle' },
+          { id: 'apple', emoji: '🍎', label: 'Apple core', binId: 'compost' }, { id: 'banana', emoji: '🍌', label: 'Banana peel', binId: 'compost' },
+          { id: 'battery', emoji: '🔋', label: 'Battery', binId: 'ewaste' }, { id: 'phone', emoji: '📱', label: 'Old phone', binId: 'ewaste' },
+          { id: 'wrapper', emoji: '🍬', label: 'Candy wrapper', binId: 'landfill' }, { id: 'straw', emoji: '🥤', label: 'Foam cup', binId: 'landfill' }
+        ] } }
+  ]
 };
 
-const app = document.getElementById('app');
-let currentGrade = 'K';
+const GRADE_LABELS = { K: 'Kindergarten', 1: 'Grade 1', 2: 'Grade 2', 3: 'Grade 3' };
 
-function renderTopbar(view) {
-  const bar = document.querySelector('.topbar__nav');
-  bar.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
-}
-
-function renderHome() {
-  renderTopbar('home');
-  const grades = GRADE_ORDER;
-  app.innerHTML = `
-    <div class="shelf-wrap">
-      <div class="shelf-intro">
-        <h2>Pick a grade, then pick a game</h2>
-        <p>Every game here is free, ad-free, and works with just a mouse, trackpad, or touchscreen —
-        click, drag, and drop are all you need. Pick a shelf below to get started.</p>
-      </div>
-      <div class="grade-picker" role="tablist" aria-label="Grade level"></div>
-      <div class="tile-grid"></div>
-    </div>
-  `;
-  const picker = app.querySelector('.grade-picker');
-  const tileGrid = app.querySelector('.tile-grid');
-
-  grades.forEach(g => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.textContent = GRADE_LABELS[g] || g;
-    btn.className = g === currentGrade ? 'active' : '';
-    btn.addEventListener('click', () => {
-      currentGrade = g;
-      renderHome();
-    });
-    picker.appendChild(btn);
-  });
-
-  GAME_REGISTRY[currentGrade].forEach((game, idx) => {
-    const tile = document.createElement('button');
-    tile.type = 'button';
-    tile.className = 'game-tile';
-    tile.innerHTML = `
-      <div class="game-tile__icon">${game.icon}</div>
-      <div class="game-tile__title">${game.title}</div>
-      <div class="game-tile__skill">${game.skill}</div>
-      <div class="game-tile__badge">${GRADE_LABELS[currentGrade] || currentGrade}</div>
-    `;
-    tile.addEventListener('click', () => renderGame(currentGrade, idx));
-    tileGrid.appendChild(tile);
-  });
-}
-
-function renderGame(grade, idx) {
-  renderTopbar('home');
-  const game = GAME_REGISTRY[grade][idx];
-  app.innerHTML = `
-    <div class="game-screen">
-      <div class="game-header">
-        <button type="button" class="back-btn">← Back to shelf</button>
-        <div class="game-title-block">
-          <h2>${game.icon} ${game.title}</h2>
-          <p>${game.skill}</p>
-        </div>
-        <span></span>
-      </div>
-      <div class="game-stage-wrap"></div>
-    </div>
-  `;
-  app.querySelector('.back-btn').addEventListener('click', renderHome);
-  const mountPoint = app.querySelector('.game-stage-wrap');
-  const Engine = ENGINES[game.engine];
-  if (Engine) {
-    Engine.mount(mountPoint, game.config, {});
-  } else {
-    mountPoint.innerHTML = `<p>This game type isn't wired up yet.</p>`;
-  }
-}
-
-function renderEducators() {
-  renderTopbar('educators');
-  app.innerHTML = `
-    <div class="edu-wrap">
-      <h2 style="margin-top:0;">For Educators &amp; Media Specialists</h2>
-      <p>This arcade was built to replace paywalled, ad-heavy mouse-skills games with a free,
-      ad-free set of activities that practice the same underlying motor skills: single-click accuracy,
-      point-and-click sequencing, click-and-drag placement, click-and-hold drawing, and precise
-      drag-to-target control.</p>
-
-      <h2>How this supports ISTE Standards for Students</h2>
-      <div class="standard-card"><b>Empowered Learner:</b> Students use the games' tools purposefully —
-      choosing colors, pieces, and decorations to achieve a goal they set for themselves.</div>
-      <div class="standard-card"><b>Digital Citizen:</b> A calm, ad-free, distraction-free environment
-      lets students build healthy, focused habits with technology from their earliest exposure to it.</div>
-      <div class="standard-card"><b>Innovative Designer:</b> Builder-style games (Make a House, Make a Robot,
-      Make a Pizza, etc.) ask students to plan, place, and revise — a small-scale design process.</div>
-      <div class="standard-card"><b>Computational Thinker:</b> Sorting games (Break the Bank, Litter Critters)
-      and Tangrams ask students to recognize categories, patterns, and spatial relationships.</div>
-
-      <h2>How this supports AISLE / I-SAIL literacies</h2>
-      <p>The Association of Illinois School Library Educators' I-SAIL framework organizes school library
-      instruction around four literacies: information, media, digital, and individual literacy. Mouse-skills
-      practice is foundational to <b>digital literacy</b> — students can't engage with information or media
-      literacy tasks on a device until they can reliably click, drag, and navigate one. These games are meant
-      as that on-ramp, ahead of (or alongside) content-based digital and media literacy lessons.</p>
-
-      <h2>A note on scope</h2>
-      <p>Titles that repeat across grade levels (Tangrams, ABCya Paint, Make a Pizza, and others) share one
-      underlying game engine, scaled up in difficulty at each grade — more pieces, finer precision, and larger
-      decoration sets as students get older. The USA Geography Puzzle uses simplified placeholder shapes at
-      approximate locations rather than exact state outlines, to keep the focus on precise drag-and-drop control.</p>
-    </div>
-  `;
-}
-
-document.querySelectorAll('.topbar__nav button').forEach(btn => {
-  btn.addEventListener('click', () => {
-    if (btn.dataset.view === 'home') renderHome();
-    if (btn.dataset.view === 'educators') renderEducators();
-  });
-});
-
-renderHome();
+// JavaScript always sorts number-like object keys (1, 2, 3) ahead of text keys
+// ('K'), regardless of how they were written, so Object.keys(GAME_REGISTRY)
+// can't be trusted for display order. This explicit list is the order the
+// grade tabs should actually appear in.
+const GRADE_ORDER = ['K', 1, 2, 3];
