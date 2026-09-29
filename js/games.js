@@ -284,24 +284,24 @@ const GAME_REGISTRY = {
       engine: 'builder', config: { sceneEmoji: '🍫', sceneLabel: 'gingerbread house', maxPlacements: 16,
         items: [{ id: 'gumdrop', emoji: '🍬', label: 'Gumdrop' }, { id: 'candycane', emoji: '🍭', label: 'Candy cane' },
                 { id: 'icing', emoji: '🤍', label: 'Icing' }, { id: 'shingle', emoji: '🟫', label: 'Roof shingle' }] } },
-    { title: 'Break the Bank - Counting', icon: '🐷', skill: 'Drag coins into the piggy bank until you reach the goal!',
-      engine: 'sorter', config: { mode: 'count', target: 75, items: [
-        // Each denomination gets its own color, size, and value printed right
-        // on the coin, so kids can tell them apart at a glance instead of
-        // needing to hover for a tooltip — every coin looked identical before.
+    { title: 'Break the Bank - Counting', icon: '🏦', skill: 'Click coins to add them to the bank and reach every goal!',
+      engine: 'sorter', config: { mode: 'count', bankLabel: 'Bank',
+        // One reusable button per denomination — clicking adds its value
+        // without ever running out, so a whole practice session isn't
+        // limited to whatever coins happened to be handed out.
         // Nickel, dime, and quarter share one realistic silver tone (real
         // US coins actually are the same metal color) — size and the
         // printed value are what tell them apart, same as real coins.
-        { id: 'p1', label: 'Penny', tokenText: '1¢', color: '#B87333', tokenSize: 52, value: 1 },
-        { id: 'p2', label: 'Penny', tokenText: '1¢', color: '#B87333', tokenSize: 52, value: 1 },
-        { id: 'n1', label: 'Nickel', tokenText: '5¢', color: '#B8BCC0', tokenSize: 60, value: 5 },
-        { id: 'n2', label: 'Nickel', tokenText: '5¢', color: '#B8BCC0', tokenSize: 60, value: 5 },
-        { id: 'd1', label: 'Dime', tokenText: '10¢', color: '#B8BCC0', tokenSize: 42, value: 10 },
-        { id: 'd2', label: 'Dime', tokenText: '10¢', color: '#B8BCC0', tokenSize: 42, value: 10 },
-        { id: 'q1', label: 'Quarter', tokenText: '25¢', color: '#B8BCC0', tokenSize: 66, value: 25 },
-        { id: 'q2', label: 'Quarter', tokenText: '25¢', color: '#B8BCC0', tokenSize: 66, value: 25 },
-        { id: 'q3', label: 'Quarter', tokenText: '25¢', color: '#B8BCC0', tokenSize: 66, value: 25 }
-      ] } },
+        coins: [
+        { id: 'penny', label: 'Penny', tokenText: '1¢', color: '#B87333', tokenSize: 52, value: 1 },
+        { id: 'nickel', label: 'Nickel', tokenText: '5¢', color: '#B8BCC0', tokenSize: 60, value: 5 },
+        { id: 'dime', label: 'Dime', tokenText: '10¢', color: '#B8BCC0', tokenSize: 42, value: 10 },
+        { id: 'quarter', label: 'Quarter', tokenText: '25¢', color: '#B8BCC0', tokenSize: 66, value: 25 }
+        ],
+        // Several goals shown together as a checklist, each getting its own
+        // checkmark as the running total reaches it.
+        milestones: [25, 50, 75, 100]
+      } },
     { title: 'Litter Critters', icon: '♻️', skill: 'Drag each piece of trash into the bin where it belongs!',
       engine: 'sorter', config: { mode: 'sort', easyHardToggle: true,
         bins: [{ id: 'recycle', emoji: '♻️', label: 'Recyclables' }, { id: 'compost', emoji: '🍎', label: 'Compost' },
