@@ -40,7 +40,7 @@ const GAME_REGISTRY = {
         ] }
     },
     {
-      title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
+      title: 'Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
       engine: 'paint', config: { brushSizes: [10, 18, 28] }
     },
     {
@@ -106,7 +106,7 @@ const GAME_REGISTRY = {
       engine: 'connectdots', config: { sequence: Array.from({ length: 20 }, (_, i) => String(i + 1)), revealEmoji: '🚀' } },
     { title: 'Connect the Dots ABC', icon: '🔤', skill: 'Click the letters in order, A to Z, to find the hidden picture!',
       engine: 'connectdots', config: { sequence: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), revealEmoji: '🦄' } },
-    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+    { title: 'Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
       engine: 'paint', config: {} },
     { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
       engine: 'paint', config: { mirrorMode: true } },
@@ -140,7 +140,7 @@ const GAME_REGISTRY = {
     { title: '100 Snowballs!', icon: '⛄', skill: 'Drag snowballs anywhere you want and build something fun!',
       engine: 'builder', config: { sceneEmoji: '❄️', sceneLabel: 'snow', unlimited: true, maxPlacements: 60,
         items: [{ id: 'snowball', emoji: '⚪', label: 'Snowball' }] } },
-    { title: 'Break the Bank - Sorting', icon: '🪙', skill: 'Drag each coin or bill into the bin where it belongs!',
+    { title: 'Money - Sorting', icon: '🪙', skill: 'Drag each coin or bill into the bin where it belongs!',
       engine: 'sorter', config: { mode: 'sort', easyHardToggle: true,
         bins: [{ id: 'coins', emoji: '🪙', label: 'Coins' }, { id: 'bills', emoji: '💵', label: 'Bills' }],
         items: [
@@ -160,7 +160,7 @@ const GAME_REGISTRY = {
           { id: 'car', emoji: '🚗', label: 'Car' }, { id: 'dog', emoji: '🐕', label: 'Dog' },
           { id: 'chimney-smoke', emoji: '💨', label: 'Chimney smoke' }
         ] } },
-    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+    { title: 'Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
       engine: 'paint', config: {} },
     { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
       engine: 'paint', config: { mirrorMode: true } },
@@ -220,7 +220,7 @@ const GAME_REGISTRY = {
   ],
 
   3: [
-    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+    { title: 'Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
       engine: 'paint', config: {} },
     { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
       engine: 'paint', config: { mirrorMode: true } },
@@ -284,7 +284,7 @@ const GAME_REGISTRY = {
       engine: 'builder', config: { sceneEmoji: '🍫', sceneLabel: 'gingerbread house', maxPlacements: 16,
         items: [{ id: 'gumdrop', emoji: '🍬', label: 'Gumdrop' }, { id: 'candycane', emoji: '🍭', label: 'Candy cane' },
                 { id: 'icing', emoji: '🤍', label: 'Icing' }, { id: 'shingle', emoji: '🟫', label: 'Roof shingle' }] } },
-    { title: 'Break the Bank - Counting', icon: '🏦', skill: 'Click coins to add them to the bank and reach every goal!',
+    { title: 'Money - Counting', icon: '🏦', skill: 'Click coins to add them to the bank and reach every goal!',
       engine: 'sorter', config: { mode: 'count', bankLabel: 'Bank',
         // One reusable button per denomination — clicking adds its value
         // without ever running out, so a whole practice session isn't
