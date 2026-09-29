@@ -40,7 +40,7 @@ const GAME_REGISTRY = {
         ] }
     },
     {
-      title: 'Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
+      title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
       engine: 'paint', config: { brushSizes: [10, 18, 28] }
     },
     {
@@ -52,20 +52,20 @@ const GAME_REGISTRY = {
     {
       title: 'Make a Cookie', icon: '🍪', skill: 'Drag chocolate chips and sprinkles onto your cookie!',
       engine: 'builder', config: { sceneEmoji: '🍪', sceneLabel: 'cookie', maxPlacements: 10,
-        items: [{ id: 'choc', emoji: '🍫', label: 'Chocolate chip' }, { id: 'icing', emoji: '🤍', label: 'Icing dot' },
-                { id: 'sprinkle', emoji: '✨', label: 'Sprinkle' }] }
+        items: [{ id: 'choc', emoji: '🟤', label: 'Chocolate chip' }, { id: 'icing', emoji: '⚪', label: 'Icing dot' },
+                { id: 'sprinkle', emoji: '🟡', label: 'Sprinkle' }] }
     },
     {
       title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings onto your pizza!',
       engine: 'builder', config: { sceneEmoji: '🍕', sceneLabel: 'pizza', maxPlacements: 8,
-        items: [{ id: 'pep', emoji: '🍕', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
+        items: [{ id: 'pep', emoji: '🔴', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
                 { id: 'pepper', emoji: '🫑', label: 'Pepper' }, { id: 'cheese', emoji: '🧀', label: 'Extra cheese' }] }
     },
     {
       title: 'Make a Face', icon: '🙂', skill: 'Drag eyes, a nose, a mouth, and hair to build a silly face!',
       engine: 'builder', config: { sceneEmoji: '⚪', sceneLabel: 'face', maxPlacements: 7,
         items: [{ id: 'eye', emoji: '👁️', label: 'Eye' }, { id: 'nose', emoji: '👃', label: 'Nose' },
-                { id: 'mouth', emoji: '👄', label: 'Mouth' }, { id: 'hair', emoji: '💇', label: 'Hair' }] }
+                { id: 'mouth', emoji: '👄', label: 'Mouth' }, { id: 'hair', emoji: '🦱', label: 'Hair' }] }
     },
     {
       title: 'Tangrams', icon: '🔺', skill: 'Drag and turn the shapes so they fit on their shadow!',
@@ -117,17 +117,17 @@ const GAME_REGISTRY = {
                 { id: 'straw', emoji: '🍓', label: 'Strawberry' }] } },
     { title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings onto your pizza!',
       engine: 'builder', config: { sceneEmoji: '🍕', sceneLabel: 'pizza', maxPlacements: 12,
-        items: [{ id: 'pep', emoji: '🍕', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
+        items: [{ id: 'pep', emoji: '🔴', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
                 { id: 'pepper', emoji: '🫑', label: 'Pepper' }, { id: 'mushroom', emoji: '🍄', label: 'Mushroom' },
                 { id: 'cheese', emoji: '🧀', label: 'Extra cheese' }] } },
     { title: 'Make a Cookie', icon: '🍪', skill: 'Drag chocolate chips, icing, and nuts onto your cookie!',
       engine: 'builder', config: { sceneEmoji: '🍪', sceneLabel: 'cookie', maxPlacements: 12,
-        items: [{ id: 'choc', emoji: '🍫', label: 'Chocolate chip' }, { id: 'icing', emoji: '🤍', label: 'Icing dot' },
-                { id: 'sprinkle', emoji: '✨', label: 'Sprinkle' }, { id: 'nut', emoji: '🥜', label: 'Nut' }] } },
+        items: [{ id: 'choc', emoji: '🟤', label: 'Chocolate chip' }, { id: 'icing', emoji: '⚪', label: 'Icing dot' },
+                { id: 'sprinkle', emoji: '🟡', label: 'Sprinkle' }, { id: 'nut', emoji: '🥜', label: 'Nut' }] } },
     { title: 'Make a Face', icon: '🙂', skill: 'Drag eyes, glasses, hats, and more to build a silly face!',
       engine: 'builder', config: { sceneEmoji: '⚪', sceneLabel: 'face', maxPlacements: 10,
         items: [{ id: 'eye', emoji: '👁️', label: 'Eye' }, { id: 'nose', emoji: '👃', label: 'Nose' },
-                { id: 'mouth', emoji: '👄', label: 'Mouth' }, { id: 'hair', emoji: '💇', label: 'Hair' },
+                { id: 'mouth', emoji: '👄', label: 'Mouth' }, { id: 'hair', emoji: '🦱', label: 'Hair' },
                 { id: 'glasses', emoji: '👓', label: 'Glasses' }, { id: 'hat', emoji: '🎩', label: 'Hat' }] } },
     { title: 'Tangrams', icon: '🔺', skill: 'Drag and turn the shapes so they fit on their shadow!',
       engine: 'tangram', config: { tolerancePx: 40, toleranceDeg: 25, pieces: [
@@ -173,7 +173,7 @@ const GAME_REGISTRY = {
                 { id: 'straw', emoji: '🍓', label: 'Strawberry' }, { id: 'choc', emoji: '🍫', label: 'Chocolate drizzle' }] } },
     { title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings like pepperoni, mushrooms, and pineapple onto your pizza!',
       engine: 'builder', config: { sceneEmoji: '🍕', sceneLabel: 'pizza', maxPlacements: 16,
-        items: [{ id: 'pep', emoji: '🍕', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
+        items: [{ id: 'pep', emoji: '🔴', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
                 { id: 'pepper', emoji: '🫑', label: 'Pepper' }, { id: 'mushroom', emoji: '🍄', label: 'Mushroom' },
                 { id: 'cheese', emoji: '🧀', label: 'Extra cheese' }, { id: 'pineapple', emoji: '🍍', label: 'Pineapple' }] } },
     { title: 'Tangrams', icon: '🔺', skill: 'Drag and turn the shapes so they fit on their shadow!',
@@ -249,12 +249,12 @@ const GAME_REGISTRY = {
     { title: 'Make a Face', icon: '🙂', skill: 'Drag eyes, hats, glasses, and more to build a silly face!',
       engine: 'builder', config: { sceneEmoji: '⚪', sceneLabel: 'face', maxPlacements: 16,
         items: [{ id: 'eye', emoji: '👁️', label: 'Eye' }, { id: 'nose', emoji: '👃', label: 'Nose' },
-                { id: 'mouth', emoji: '👄', label: 'Mouth' }, { id: 'hair', emoji: '💇', label: 'Hair' },
+                { id: 'mouth', emoji: '👄', label: 'Mouth' }, { id: 'hair', emoji: '🦱', label: 'Hair' },
                 { id: 'glasses', emoji: '👓', label: 'Glasses' }, { id: 'hat', emoji: '🎩', label: 'Hat' },
                 { id: 'mustache', emoji: '👨', label: 'Mustache' }, { id: 'earring', emoji: '💎', label: 'Earring' }] } },
     { title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings like pepperoni, mushrooms, and pineapple onto your pizza!',
       engine: 'builder', config: { sceneEmoji: '🍕', sceneLabel: 'pizza', maxPlacements: 20,
-        items: [{ id: 'pep', emoji: '🍕', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
+        items: [{ id: 'pep', emoji: '🔴', label: 'Pepperoni' }, { id: 'olive', emoji: '🫒', label: 'Olive' },
                 { id: 'pepper', emoji: '🫑', label: 'Pepper' }, { id: 'mushroom', emoji: '🍄', label: 'Mushroom' },
                 { id: 'cheese', emoji: '🧀', label: 'Extra cheese' }, { id: 'pineapple', emoji: '🍍', label: 'Pineapple' },
                 { id: 'basil', emoji: '🌿', label: 'Basil' }] } },
