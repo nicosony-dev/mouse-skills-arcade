@@ -107,7 +107,16 @@ const BuilderEngine = {
       }
       selectThis();
 
-      makeDraggable(el, stage, { bounds: true, onStart: selectThis });
+      makeDraggable(el, stage, {
+        bounds: true,
+        onStart: selectThis,
+        // Two quick taps remove a placed piece. Implemented via the drag
+        // helper's own tap detection rather than a native 'dblclick'
+        // listener, since preventDefault() on pointerdown (needed for
+        // smooth dragging) can unreliably suppress the browser's
+        // synthesized click/dblclick in some browsers/input types.
+        onDoubleTap: () => { el.remove(); placedCount--; updateStatus(); }
+      });
 
       handle.addEventListener('pointerdown', (ev) => {
         ev.stopPropagation(); // don't also trigger the item's own drag-to-move
@@ -130,11 +139,6 @@ const BuilderEngine = {
         window.addEventListener('pointermove', move);
         window.addEventListener('pointerup', up);
       });
-      // Don't let a double-click on the resize handle also delete the piece.
-      handle.addEventListener('dblclick', (ev) => ev.stopPropagation());
-
-      // Double-click / double-tap removes a placed piece.
-      el.addEventListener('dblclick', () => { el.remove(); placedCount--; updateStatus(); });
       placedCount++;
       updateStatus();
       if (api && api.onProgress) api.onProgress({ placedCount, cap });
