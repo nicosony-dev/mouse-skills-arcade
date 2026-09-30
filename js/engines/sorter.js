@@ -312,8 +312,18 @@ function mountCountMode(container, config, api) {
     if (!finished && state === 'success') {
       const nextBtn = document.createElement('button');
       nextBtn.type = 'button';
-      nextBtn.className = 'primary';
-      nextBtn.textContent = 'Next ➡️';
+      nextBtn.textContent = 'NEXT ▶';
+      nextBtn.style.background = 'var(--chalk-green)';
+      nextBtn.style.color = 'var(--cream)';
+      nextBtn.style.border = 'none';
+      nextBtn.style.borderRadius = 'var(--radius-pill)';
+      nextBtn.style.padding = '14px 32px';
+      nextBtn.style.fontWeight = '800';
+      nextBtn.style.fontFamily = "'Baloo 2', sans-serif";
+      nextBtn.style.fontSize = '1.1rem';
+      nextBtn.style.letterSpacing = '0.5px';
+      nextBtn.style.cursor = 'pointer';
+      nextBtn.style.boxShadow = '0 4px 0 rgba(43, 38, 33, 0.2)';
       nextBtn.addEventListener('click', () => {
         goalIndex++;
         current = 0;
