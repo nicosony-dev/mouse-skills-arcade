@@ -11,11 +11,37 @@
                                    // over sceneEmoji if both are given
      sceneLabel: 'house',
      items: [{ id, emoji, label }],
+     // An item can use `html` (a small inline SVG string) instead of
+     // `emoji`, for a shape no emoji covers well — like a striped birthday
+     // candle. If the SVG uses <pattern>/<clipPath> ids, write them as
+     // __UID__yourname in the markup; builder.js swaps __UID__ for a fresh
+     // unique value each time an instance renders, so multiple placed
+     // copies never collide.
      maxPlacements: 14,           // omit or set unlimited:true for a sandbox
      unlimited: false,
      repeatable: true             // can the same tray item be placed more than once?
    }
 */
+let _builderSvgUidCounter = 0;
+/** Fills `el` with an item's visual — its custom SVG (item.html) if given,
+    otherwise its plain emoji character. sizePx (optional) sets an explicit
+    box size, needed for SVG content since it doesn't scale via font-size. */
+function renderItemVisual(el, item, sizePx) {
+  if (item.html) {
+    const uid = 'bsvg' + (_builderSvgUidCounter++);
+    el.innerHTML = item.html.replace(/__UID__/g, uid);
+    el.style.display = 'inline-flex';
+    el.style.alignItems = 'center';
+    el.style.justifyContent = 'center';
+    if (sizePx) {
+      el.style.width = sizePx + 'px';
+      el.style.height = sizePx + 'px';
+    }
+  } else {
+    el.textContent = item.emoji;
+  }
+}
+
 const BuilderEngine = {
   mount(container, config, api) {
     const items = config.items || [];
@@ -42,7 +68,7 @@ const BuilderEngine = {
       bg.style.left = '50%';
       bg.style.top = '54%';
       bg.style.transform = 'translate(-50%, -50%)';
-      bg.style.width = 'min(60vw, 480px)';
+      bg.style.width = 'min(60vw, 320px)';
       bg.style.height = 'auto';
       bg.style.opacity = '0.16';
       bg.style.pointerEvents = 'none';
@@ -82,7 +108,7 @@ const BuilderEngine = {
       }
     }
 
-    function placeItem(sourceEl, clientX, clientY) {
+    function placeItem(item, clientX, clientY) {
       if (placedCount >= cap) {
         status.textContent = "That's the limit for this scene! Press Clear to start over.";
         return;
@@ -100,8 +126,8 @@ const BuilderEngine = {
       let size = 40; // starting size in px
       const emojiSpan = document.createElement('span');
       emojiSpan.className = 'placed-item-emoji';
-      emojiSpan.textContent = sourceEl.dataset.emoji;
       emojiSpan.style.fontSize = size + 'px';
+      renderItemVisual(emojiSpan, item, item.html ? size : null);
       el.appendChild(emojiSpan);
 
       // A small drag handle in the corner lets kids resize the piece after
@@ -148,6 +174,10 @@ const BuilderEngine = {
           const dist = Math.hypot(mv.clientX - centerX, mv.clientY - centerY);
           size = Math.max(20, Math.min(140, startSize * (dist / startDist)));
           emojiSpan.style.fontSize = size + 'px';
+          if (item.html) {
+            emojiSpan.style.width = size + 'px';
+            emojiSpan.style.height = size + 'px';
+          }
         }
         function up() {
           window.removeEventListener('pointermove', move);
@@ -165,8 +195,7 @@ const BuilderEngine = {
       const el = document.createElement('button');
       el.type = 'button';
       el.className = 'tray-item';
-      el.textContent = item.emoji;
-      el.dataset.emoji = item.emoji;
+      renderItemVisual(el, item, item.html ? 40 : null);
       el.title = item.label;
       el.setAttribute('aria-label', item.label);
       tray.appendChild(el);
@@ -179,7 +208,7 @@ const BuilderEngine = {
         ev.preventDefault();
         dragGhost = document.createElement('div');
         dragGhost.className = 'placed-item';
-        dragGhost.textContent = item.emoji;
+        renderItemVisual(dragGhost, item, item.html ? 40 : null);
         dragGhost.style.position = 'fixed';
         dragGhost.style.left = ev.clientX - 20 + 'px';
         dragGhost.style.top = ev.clientY - 20 + 'px';
@@ -199,7 +228,7 @@ const BuilderEngine = {
             uv.clientX >= stageRect.left && uv.clientX <= stageRect.right &&
             uv.clientY >= stageRect.top && uv.clientY <= stageRect.bottom
           ) {
-            placeItem(el, uv.clientX, uv.clientY);
+            placeItem(item, uv.clientX, uv.clientY);
           }
           dragGhost.remove();
           dragGhost = null;
@@ -211,7 +240,7 @@ const BuilderEngine = {
       // Fallback for keyboard users: click places it in the middle of the stage.
       el.addEventListener('click', () => {
         const r = stage.getBoundingClientRect();
-        placeItem(el, r.left + r.width / 2, r.top + r.height / 2);
+        placeItem(item, r.left + r.width / 2, r.top + r.height / 2);
       });
     });
 
