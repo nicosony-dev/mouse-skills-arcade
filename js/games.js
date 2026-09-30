@@ -40,7 +40,7 @@ const GAME_REGISTRY = {
         ] }
     },
     {
-      title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
+      title: 'Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
       engine: 'paint', config: { brushSizes: [10, 18, 28] }
     },
     {
@@ -106,7 +106,7 @@ const GAME_REGISTRY = {
       engine: 'connectdots', config: { sequence: Array.from({ length: 20 }, (_, i) => String(i + 1)), revealEmoji: '🚀' } },
     { title: 'Connect the Dots ABC', icon: '🔤', skill: 'Click the letters in order, A to Z, to find the hidden picture!',
       engine: 'connectdots', config: { sequence: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), revealEmoji: '🦄' } },
-    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+    { title: 'Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
       engine: 'paint', config: {} },
     { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
       engine: 'paint', config: { mirrorMode: true } },
@@ -160,7 +160,7 @@ const GAME_REGISTRY = {
           { id: 'car', emoji: '🚗', label: 'Car' }, { id: 'dog', emoji: '🐕', label: 'Dog' },
           { id: 'chimney-smoke', emoji: '💨', label: 'Chimney smoke' }
         ] } },
-    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+    { title: 'Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
       engine: 'paint', config: {} },
     { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
       engine: 'paint', config: { mirrorMode: true } },
@@ -220,7 +220,7 @@ const GAME_REGISTRY = {
   ],
 
   3: [
-    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+    { title: 'Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
       engine: 'paint', config: {} },
     { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
       engine: 'paint', config: { mirrorMode: true } },
