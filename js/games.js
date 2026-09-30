@@ -40,7 +40,7 @@ const GAME_REGISTRY = {
         ] }
     },
     {
-      title: 'Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
+      title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
       engine: 'paint', config: { brushSizes: [10, 18, 28] }
     },
     {
@@ -106,7 +106,7 @@ const GAME_REGISTRY = {
       engine: 'connectdots', config: { sequence: Array.from({ length: 20 }, (_, i) => String(i + 1)), revealEmoji: '🚀' } },
     { title: 'Connect the Dots ABC', icon: '🔤', skill: 'Click the letters in order, A to Z, to find the hidden picture!',
       engine: 'connectdots', config: { sequence: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), revealEmoji: '🦄' } },
-    { title: 'Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
       engine: 'paint', config: {} },
     { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
       engine: 'paint', config: { mirrorMode: true } },
@@ -140,7 +140,7 @@ const GAME_REGISTRY = {
     { title: '100 Snowballs!', icon: '⛄', skill: 'Drag snowballs anywhere you want and build something fun!',
       engine: 'builder', config: { sceneEmoji: '❄️', sceneLabel: 'snow', unlimited: true, maxPlacements: 60,
         items: [{ id: 'snowball', emoji: '⚪', label: 'Snowball' }] } },
-    { title: 'Money - Sorting', icon: '🪙', skill: 'Drag each coin or bill into the bin where it belongs!',
+    { title: 'Break the Bank - Sorting', icon: '🪙', skill: 'Drag each coin or bill into the bin where it belongs!',
       engine: 'sorter', config: { mode: 'sort', easyHardToggle: true,
         bins: [{ id: 'coins', emoji: '🪙', label: 'Coins' }, { id: 'bills', emoji: '💵', label: 'Bills' }],
         items: [
@@ -160,7 +160,7 @@ const GAME_REGISTRY = {
           { id: 'car', emoji: '🚗', label: 'Car' }, { id: 'dog', emoji: '🐕', label: 'Dog' },
           { id: 'chimney-smoke', emoji: '💨', label: 'Chimney smoke' }
         ] } },
-    { title: 'Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
       engine: 'paint', config: {} },
     { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
       engine: 'paint', config: { mirrorMode: true } },
@@ -220,7 +220,7 @@ const GAME_REGISTRY = {
   ],
 
   3: [
-    { title: 'Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
       engine: 'paint', config: {} },
     { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
       engine: 'paint', config: { mirrorMode: true } },
@@ -284,11 +284,11 @@ const GAME_REGISTRY = {
       engine: 'builder', config: { sceneEmoji: '🍫', sceneLabel: 'gingerbread house', maxPlacements: 16,
         items: [{ id: 'gumdrop', emoji: '🍬', label: 'Gumdrop' }, { id: 'candycane', emoji: '🍭', label: 'Candy cane' },
                 { id: 'icing', emoji: '🤍', label: 'Icing' }, { id: 'shingle', emoji: '🟫', label: 'Roof shingle' }] } },
-    { title: 'Money - Counting', icon: '🏦', skill: 'Click coins to add them to the bank and reach every goal!',
-      engine: 'sorter', config: { mode: 'count', bankLabel: 'Bank',
-        // One reusable button per denomination — clicking adds its value
-        // without ever running out, so a whole practice session isn't
-        // limited to whatever coins happened to be handed out.
+    { title: 'Break the Bank - Counting', icon: '🏦', skill: 'Drag coins onto a goal until you reach that exact amount!',
+      engine: 'sorter', config: { mode: 'count',
+        // One reusable button per denomination — dragging never removes it,
+        // so a whole practice session isn't limited to whatever coins
+        // happened to be handed out.
         // Nickel, dime, and quarter share one realistic silver tone (real
         // US coins actually are the same metal color) — size and the
         // printed value are what tell them apart, same as real coins.
@@ -298,9 +298,11 @@ const GAME_REGISTRY = {
         { id: 'dime', label: 'Dime', tokenText: '10¢', color: '#B8BCC0', tokenSize: 42, value: 10 },
         { id: 'quarter', label: 'Quarter', tokenText: '25¢', color: '#B8BCC0', tokenSize: 66, value: 25 }
         ],
-        // Several goals shown together as a checklist, each getting its own
-        // checkmark as the running total reaches it.
-        milestones: [25, 50, 75, 100]
+        // Worked through one at a time, in order — finishing one reveals
+        // the next. Mostly NOT round multiples of 25, so most goals take
+        // an actual combination of coins rather than one coin dragged
+        // repeatedly; a couple of round ones are mixed in for pacing.
+        goals: [75, 83, 72, 105, 58, 91, 47, 130, 64, 99]
       } },
     { title: 'Litter Critters', icon: '♻️', skill: 'Drag each piece of trash into the bin where it belongs!',
       engine: 'sorter', config: { mode: 'sort', easyHardToggle: true,
