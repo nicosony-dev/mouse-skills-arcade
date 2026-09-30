@@ -50,15 +50,33 @@ const BubbleMathEngine = {
       return a;
     }
 
+    // Both operands in every equation — including the larger, first number
+    // in a subtraction like "12 − 5" — stay within [minOperand, maxOperand].
+    // An earlier version only bounded the smaller number being subtracted,
+    // so e.g. a maxOperand of 10 could still show "24 − 11".
+    function additionFor(target) {
+      // a + b = target, both within [minOperand, maxOperand]
+      const aMin = Math.max(minOperand, target - maxOperand);
+      const aMax = Math.min(maxOperand, target - minOperand);
+      if (aMin > aMax) return null; // not achievable within the operand range
+      const a = randInt(aMin, aMax);
+      return { label: `${a} + ${target - a}`, value: target };
+    }
+
+    function subtractionFor(target) {
+      // c - d = target, both within [minOperand, maxOperand]
+      const dMin = minOperand;
+      const dMax = Math.min(maxOperand - target, maxOperand);
+      if (dMax < dMin) return null; // not achievable within the operand range
+      const d = randInt(dMin, dMax);
+      return { label: `${target + d} − ${d}`, value: target };
+    }
+
     function makeCorrectEquation(target) {
-      if (Math.random() < 0.5 && target - minOperand >= minOperand) {
-        const a = randInt(minOperand, target - minOperand);
-        const b = target - a;
-        return { label: `${a} + ${b}`, value: target };
-      }
-      const d = randInt(minOperand, maxOperand);
-      const c = target + d;
-      return { label: `${c} − ${d}`, value: target };
+      const add = additionFor(target);
+      const sub = subtractionFor(target);
+      if (add && sub) return Math.random() < 0.5 ? add : sub;
+      return add || sub || { label: `${target} + 0`, value: target }; // extreme fallback
     }
 
     function makeDistractorEquation(target) {
@@ -70,8 +88,8 @@ const BubbleMathEngine = {
           const b = randInt(minOperand, maxOperand);
           value = a + b; label = `${a} + ${b}`;
         } else {
-          const c = randInt(minOperand + 1, maxOperand * 2);
-          const d = randInt(minOperand, c - 1);
+          const c = randInt(minOperand, maxOperand);
+          const d = randInt(minOperand, c);
           value = c - d; label = `${c} − ${d}`;
         }
       } while (value === target && tries < 20);
