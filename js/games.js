@@ -281,7 +281,7 @@ const GAME_REGISTRY = {
         items: [{ id: 'orn', emoji: '🔴', label: 'Ornament' }, { id: 'star', emoji: '⭐', label: 'Star topper' },
                 { id: 'light', emoji: '💡', label: 'Light' }, { id: 'candy', emoji: '🍬', label: 'Candy cane' }] } },
     { title: 'Make a Gingerbread House', icon: '🏠', skill: 'Drag candy and icing to decorate your gingerbread house!',
-      engine: 'builder', config: { sceneEmoji: '🍫', sceneLabel: 'gingerbread house', maxPlacements: 16,
+      engine: 'builder', config: { sceneEmoji: '🏠', sceneLabel: 'gingerbread house', maxPlacements: 16,
         items: [{ id: 'gumdrop', emoji: '🍬', label: 'Gumdrop' }, { id: 'candycane', emoji: '🍭', label: 'Candy cane' },
                 { id: 'icing', emoji: '🤍', label: 'Icing' }, { id: 'shingle', emoji: '🟫', label: 'Roof shingle' }] } },
     { title: 'Break the Bank - Counting', icon: '🏦', skill: 'Drag coins onto a goal until you reach that exact amount!',
