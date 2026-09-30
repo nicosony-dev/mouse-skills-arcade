@@ -190,13 +190,14 @@ const GAME_REGISTRY = {
         { shape: 'square', color: '#8E6BB0', target: { x: 40, y: 68, rotation: 0 } },
         { shape: 'parallelogram', color: '#2F5D50', target: { x: 62, y: 70, rotation: 0 } }
       ] } },
-    { title: 'USA Geography Puzzle', icon: '🗺️', skill: 'Drag each state to its spot on the map!',
-      engine: 'geomap', config: { tolerancePx: 50, states: [
-        { id: 'CA', label: 'California', x: 12, y: 45 }, { id: 'TX', label: 'Texas', x: 40, y: 68 },
-        { id: 'FL', label: 'Florida', x: 78, y: 82 }, { id: 'NY', label: 'New York', x: 80, y: 25 },
-        { id: 'IL', label: 'Illinois', x: 58, y: 40 }, { id: 'WA', label: 'Washington', x: 15, y: 12 },
-        { id: 'CO', label: 'Colorado', x: 38, y: 45 }, { id: 'ME', label: 'Maine', x: 88, y: 14 }
-      ] } },
+    { title: 'Bubble Pop Math', icon: '🫧', skill: 'Pop the bubbles that match the answer!',
+      // US geography isn't taught until Grade 4 — same reasoning as the
+      // Grade 3 swap. Reuses the bubblemath engine with an easier number
+      // range appropriate for Grade 2 (Grade 3's version uses bigger numbers).
+      engine: 'bubblemath', config: {
+        minOperand: 1, maxOperand: 10, minTarget: 5, maxTarget: 20,
+        correctPerRound: 3, distractorCount: 6
+      } },
     { title: '100 Snowballs!', icon: '⛄', skill: 'Drag snowballs anywhere you want and build something fun!',
       engine: 'builder', config: { sceneEmoji: '❄️', sceneLabel: 'snow', unlimited: true, maxPlacements: 100,
         items: [{ id: 'snowball', emoji: '⚪', label: 'Snowball' }] } },
