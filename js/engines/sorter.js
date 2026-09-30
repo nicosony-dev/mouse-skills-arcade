@@ -204,6 +204,7 @@ function mountCountMode(container, config, api) {
   const goalAmounts = config.goals || [];
   let goalIndex = 0;
   let current = 0;
+  let state = 'playing'; // 'playing' | 'error' | 'allDone'
 
   container.innerHTML = `
     <div class="toolbar"></div>
@@ -247,13 +248,36 @@ function mountCountMode(container, config, api) {
     box.style.padding = '16px 26px';
     box.style.borderRadius = '16px';
     box.style.minWidth = '140px';
-    const done = finished; // once every goal is complete, keep it styled as done
-    box.style.border = '3px ' + (done ? 'solid' : 'dashed') + ' ' + (done ? 'var(--chalk-green)' : 'var(--paper-line)');
-    box.style.background = done ? 'var(--chalk-green)' : '#fdfcf7';
-    box.style.color = done ? 'var(--cream)' : 'var(--ink)';
+
     if (finished) {
+      box.style.border = '3px solid var(--chalk-green)';
+      box.style.background = 'var(--chalk-green)';
+      box.style.color = 'var(--cream)';
       box.innerHTML = `<div style="font-weight:800; font-family:'Baloo 2', sans-serif; font-size:1.1rem;">✅ All done!</div>`;
+    } else if (state === 'error') {
+      // A same-style status line was too easy to miss — a mistake gets its
+      // own loud, unmistakable state: red border, a big X, and play pauses
+      // until the student deliberately presses Try Again.
+      box.style.border = '3px solid var(--coral)';
+      box.style.background = '#FBEAE7';
+      box.style.color = 'var(--ink)';
+      box.innerHTML = `
+        <div style="font-size:2.2rem; line-height:1;">❌</div>
+        <div style="font-size:0.8rem; opacity:0.75;">Goal ${goalIndex + 1} of ${goalAmounts.length}</div>
+        <div style="font-weight:800; font-family:'Baloo 2', sans-serif; font-size:1.3rem;">${goalAmounts[goalIndex]}¢</div>
+        <div style="font-weight:800; color:var(--coral);">Too much! You added ${current}¢.</div>
+        <button type="button" class="try-again-btn primary" style="margin-top:6px;">🔄 Try Again</button>
+      `;
+      box.querySelector('.try-again-btn').addEventListener('click', () => {
+        current = 0;
+        state = 'playing';
+        status.textContent = `Let's try ${goalAmounts[goalIndex]}¢ again.`;
+        renderGoal();
+      });
     } else {
+      box.style.border = '3px dashed var(--paper-line)';
+      box.style.background = '#fdfcf7';
+      box.style.color = 'var(--ink)';
       box.innerHTML = `
         <div style="font-size:0.8rem; opacity:0.75;">Goal ${goalIndex + 1} of ${goalAmounts.length}</div>
         <div style="font-weight:800; font-family:'Baloo 2', sans-serif; font-size:1.3rem;">${goalAmounts[goalIndex]}¢</div>
@@ -264,6 +288,10 @@ function mountCountMode(container, config, api) {
   }
 
   function dropOnGoal(coin) {
+    if (state === 'error') {
+      status.textContent = 'Press "Try Again" before adding more coins.';
+      return;
+    }
     if (goalIndex >= goalAmounts.length) return; // already finished every goal
     const target = goalAmounts[goalIndex];
     current += coin.value;
@@ -275,8 +303,8 @@ function mountCountMode(container, config, api) {
         status.innerHTML = `<span class="celebrate">🎉 All goals reached! Press Reset to play again.</span>`;
       }
     } else if (current > target) {
-      status.textContent = `That's over ${target}¢ — try this one again.`;
-      current = 0;
+      state = 'error';
+      status.textContent = '';
     } else {
       status.textContent = `${target - current}¢ more to reach ${target}¢.`;
     }
@@ -337,6 +365,7 @@ function mountCountMode(container, config, api) {
   resetBtn.addEventListener('click', () => {
     goalIndex = 0;
     current = 0;
+    state = 'playing';
     renderGoal();
     status.textContent = '';
   });
