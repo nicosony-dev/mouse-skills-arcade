@@ -7,6 +7,8 @@
 
    config = {
      sceneEmoji: '🏠',            // big background motif drawn on the stage
+     sceneImage: 'assets/x.png',  // OR a real image file, takes priority
+                                   // over sceneEmoji if both are given
      sceneLabel: 'house',
      items: [{ id, emoji, label }],
      maxPlacements: 14,           // omit or set unlimited:true for a sandbox
@@ -30,8 +32,23 @@ const BuilderEngine = {
     const stage = container.querySelector('.stage');
     const status = container.querySelector('.status-line');
 
-    // Big faint background motif so the stage doesn't feel empty.
-    if (config.sceneEmoji) {
+    // Big faint background motif so the stage doesn't feel empty — a real
+    // image (sceneImage) if one is given, otherwise a big emoji character.
+    if (config.sceneImage) {
+      const bg = document.createElement('img');
+      bg.src = config.sceneImage;
+      bg.alt = '';
+      bg.style.position = 'absolute';
+      bg.style.left = '50%';
+      bg.style.top = '54%';
+      bg.style.transform = 'translate(-50%, -50%)';
+      bg.style.width = 'min(60vw, 320px)';
+      bg.style.height = 'auto';
+      bg.style.opacity = '0.16';
+      bg.style.pointerEvents = 'none';
+      bg.style.userSelect = 'none';
+      stage.appendChild(bg);
+    } else if (config.sceneEmoji) {
       const bg = document.createElement('div');
       bg.textContent = config.sceneEmoji;
       bg.style.position = 'absolute';
