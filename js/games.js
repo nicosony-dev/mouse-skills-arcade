@@ -17,7 +17,7 @@ const GAME_REGISTRY = {
     },
     {
       title: 'ABC and 123 Magnets', icon: '🧲', skill: 'Drag letters and numbers around the board!',
-      engine: 'magnets', config: { tileSet: 'letters' }
+      engine: 'magnets', config: { tileSet: 'both' }
     },
     {
       title: 'Connect the Dots', icon: '🔢', skill: 'Click the numbers in order to find the hidden picture!',
@@ -40,7 +40,7 @@ const GAME_REGISTRY = {
         ] }
     },
     {
-      title: 'Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
+      title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and draw anything you want!',
       engine: 'paint', config: { brushSizes: [10, 18, 28] }
     },
     {
@@ -106,7 +106,7 @@ const GAME_REGISTRY = {
       engine: 'connectdots', config: { sequence: Array.from({ length: 20 }, (_, i) => String(i + 1)), revealEmoji: '🚀' } },
     { title: 'Connect the Dots ABC', icon: '🔤', skill: 'Click the letters in order, A to Z, to find the hidden picture!',
       engine: 'connectdots', config: { sequence: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split(''), revealEmoji: '🦄' } },
-    { title: 'Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
       engine: 'paint', config: {} },
     { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
       engine: 'paint', config: { mirrorMode: true } },
@@ -160,7 +160,7 @@ const GAME_REGISTRY = {
           { id: 'car', emoji: '🚗', label: 'Car' }, { id: 'dog', emoji: '🐕', label: 'Dog' },
           { id: 'chimney-smoke', emoji: '💨', label: 'Chimney smoke' }
         ] } },
-    { title: 'Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
       engine: 'paint', config: {} },
     { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
       engine: 'paint', config: { mirrorMode: true } },
@@ -220,7 +220,7 @@ const GAME_REGISTRY = {
   ],
 
   3: [
-    { title: 'Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
+    { title: 'ABCya Paint', icon: '🖌️', skill: 'Pick a color and brush size, then draw!',
       engine: 'paint', config: {} },
     { title: 'Magic Mirror Paint', icon: '🪞', skill: 'Draw on one side and watch it magically copy to the other side!',
       engine: 'paint', config: { mirrorMode: true } },
