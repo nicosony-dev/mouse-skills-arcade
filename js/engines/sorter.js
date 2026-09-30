@@ -183,42 +183,40 @@ const SorterEngine = {
 };
 
 /* Count mode — Break the Bank - Counting.
-   Practices: repeated, deliberate clicking/dragging to build up an amount,
-   plus recognizing when a running total has crossed each of several goals.
+   Practices: dragging coins precisely onto a target, and building an exact
+   amount one coin at a time — not just clicking anything until numbers go
+   up. Goals are worked through ONE AT A TIME, in order; finishing one
+   automatically reveals the next. Amounts are a mix of round and
+   not-round-multiples-of-25 (like 83¢ or $1.05), so most goals take an
+   actual combination of coins rather than dropping the same coin repeatedly.
 
    config = {
      mode: 'count',
-     bankLabel: 'Bank',                 // neutral label — no piggy-bank icon
      coins: [{ id, label, tokenText, color, tokenSize, value }],
-     // ^ ONE permanent, reusable button per denomination — clicking (or
-     //   dragging into the bank) adds its value without ever running out.
-     milestones: [25, 50, 75, 100]       // ascending cent goals, each gets
-                                          // its own checkmark as the running
-                                          // total reaches it
+     // ^ permanent, reusable coin buttons at the top — dragging one never
+     //   removes it, so kids never run out mid-goal.
+     goals: [75, 83, 72, 105, ...]   // ordered list of cent targets, worked
+                                       // through one at a time
    }
 */
 function mountCountMode(container, config, api) {
   const coins = config.coins || [];
-  const milestones = (config.milestones || []).slice().sort((a, b) => a - b);
-  const bankLabel = config.bankLabel || 'Bank';
-  let total = 0;
-  const achieved = new Set();
+  const goalAmounts = config.goals || [];
+  let goalIndex = 0;
+  let current = 0;
 
   container.innerHTML = `
     <div class="toolbar"></div>
-    <div class="tray coin-tray" aria-label="Coins — click or drag into the bank"></div>
-    <div class="bank-wrap" style="margin-top:14px; padding:14px; border:3px dashed var(--paper-line); border-radius:16px; background:#fdfcf7;">
-      <div style="font-weight:800; font-family:'Baloo 2', sans-serif; margin-bottom:8px;">🏦 ${bankLabel}: <span class="bank-total">0¢</span></div>
-      <div class="goals-row" style="display:flex; flex-wrap:wrap; gap:10px;" aria-label="Goals"></div>
-    </div>
-    <p class="status-line"></p>
+    <div class="tray coin-tray" aria-label="Coins — drag one onto the goal"
+         style="justify-content:center;"></div>
+    <p class="status-line" style="margin-top:14px;"></p>
+    <div class="goals-row" style="display:flex; justify-content:center; margin-top:10px;" aria-label="Current goal"></div>
   `;
 
   const toolbar = container.querySelector('.toolbar');
   const tray = container.querySelector('.tray');
-  const bankTotalEl = container.querySelector('.bank-total');
-  const goalsRow = container.querySelector('.goals-row');
   const status = container.querySelector('.status-line');
+  const goalsRow = container.querySelector('.goals-row');
 
   function styleAsToken(el, coin) {
     el.textContent = coin.tokenText || coin.label;
@@ -234,72 +232,116 @@ function mountCountMode(container, config, api) {
     el.style.fontWeight = '800';
     el.style.padding = '0';
     el.style.border = '2px solid #2B2621';
-    el.style.cursor = 'pointer';
+    el.style.cursor = 'grab';
   }
 
-  function renderGoals() {
+  function renderGoal() {
     goalsRow.innerHTML = '';
-    milestones.forEach(m => {
-      const done = achieved.has(m);
-      const badge = document.createElement('div');
-      badge.style.display = 'flex';
-      badge.style.alignItems = 'center';
-      badge.style.gap = '6px';
-      badge.style.padding = '8px 14px';
-      badge.style.borderRadius = '999px';
-      badge.style.fontWeight = '800';
-      badge.style.border = '2px solid ' + (done ? 'var(--chalk-green)' : 'var(--paper-line)');
-      badge.style.background = done ? 'var(--chalk-green)' : '#fff';
-      badge.style.color = done ? 'var(--cream)' : 'var(--ink)';
-      badge.innerHTML = `<span>${done ? '✅' : '⬜'}</span><span>${m}¢</span>`;
-      goalsRow.appendChild(badge);
-    });
+    const finished = goalIndex >= goalAmounts.length;
+    const box = document.createElement('div');
+    box.className = 'goal-box';
+    box.style.display = 'flex';
+    box.style.flexDirection = 'column';
+    box.style.alignItems = 'center';
+    box.style.gap = '4px';
+    box.style.padding = '16px 26px';
+    box.style.borderRadius = '16px';
+    box.style.minWidth = '140px';
+    const done = finished; // once every goal is complete, keep it styled as done
+    box.style.border = '3px ' + (done ? 'solid' : 'dashed') + ' ' + (done ? 'var(--chalk-green)' : 'var(--paper-line)');
+    box.style.background = done ? 'var(--chalk-green)' : '#fdfcf7';
+    box.style.color = done ? 'var(--cream)' : 'var(--ink)';
+    if (finished) {
+      box.innerHTML = `<div style="font-weight:800; font-family:'Baloo 2', sans-serif; font-size:1.1rem;">✅ All done!</div>`;
+    } else {
+      box.innerHTML = `
+        <div style="font-size:0.8rem; opacity:0.75;">Goal ${goalIndex + 1} of ${goalAmounts.length}</div>
+        <div style="font-weight:800; font-family:'Baloo 2', sans-serif; font-size:1.3rem;">${goalAmounts[goalIndex]}¢</div>
+        <div class="goal-progress" style="font-size:0.9rem;">${current}¢ so far</div>
+      `;
+    }
+    goalsRow.appendChild(box);
   }
 
-  function addCoin(coin) {
-    total += coin.value;
-    bankTotalEl.textContent = `${total}¢`;
-    let newlyAchieved = null;
-    milestones.forEach(m => {
-      if (total >= m && !achieved.has(m)) {
-        achieved.add(m);
-        newlyAchieved = m;
+  function dropOnGoal(coin) {
+    if (goalIndex >= goalAmounts.length) return; // already finished every goal
+    const target = goalAmounts[goalIndex];
+    current += coin.value;
+    if (current === target) {
+      status.innerHTML = `<span class="celebrate">🎉 ${target}¢ — exactly right!</span>`;
+      goalIndex++;
+      current = 0;
+      if (goalIndex >= goalAmounts.length) {
+        status.innerHTML = `<span class="celebrate">🎉 All goals reached! Press Reset to play again.</span>`;
       }
-    });
-    renderGoals();
-    if (newlyAchieved) {
-      status.innerHTML = `<span class="celebrate">🎉 You reached ${newlyAchieved}¢!</span>`;
+    } else if (current > target) {
+      status.textContent = `That's over ${target}¢ — try this one again.`;
+      current = 0;
     } else {
-      const next = milestones.find(m => !achieved.has(m));
-      status.textContent = next ? `In the bank: ${total}¢. ${next - total}¢ to go for the next goal.` : `In the bank: ${total}¢.`;
+      status.textContent = `${target - current}¢ more to reach ${target}¢.`;
     }
-    if (milestones.length && milestones.every(m => achieved.has(m))) {
-      status.innerHTML = `<span class="celebrate">🎉 All goals reached! Press Reset to play again.</span>`;
-    }
+    renderGoal();
   }
 
   coins.forEach(coin => {
-    const el = document.createElement('button');
-    el.type = 'button';
+    const el = document.createElement('div');
     el.className = 'tray-item';
     el.title = coin.label;
     styleAsToken(el, coin);
-    el.addEventListener('click', () => addCoin(coin));
     tray.appendChild(el);
+
+    let ghost = null;
+    el.addEventListener('pointerdown', (ev) => {
+      if (ev.button !== undefined && ev.button !== 0) return;
+      ev.preventDefault();
+      ghost = document.createElement('div');
+      ghost.className = 'tray-item';
+      styleAsToken(ghost, coin);
+      ghost.style.position = 'fixed';
+      ghost.style.zIndex = '999';
+      ghost.style.pointerEvents = 'none';
+      ghost.style.left = ev.clientX - 20 + 'px';
+      ghost.style.top = ev.clientY - 20 + 'px';
+      document.body.appendChild(ghost);
+
+      function move(mv) {
+        ghost.style.left = mv.clientX - 20 + 'px';
+        ghost.style.top = mv.clientY - 20 + 'px';
+        const box = goalsRow.querySelector('.goal-box');
+        if (box) {
+          const r = box.getBoundingClientRect();
+          const over = mv.clientX >= r.left && mv.clientX <= r.right && mv.clientY >= r.top && mv.clientY <= r.bottom;
+          box.style.outline = over ? '3px solid var(--sky)' : 'none';
+        }
+      }
+      function up(uv) {
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', up);
+        ghost.remove();
+        const box = goalsRow.querySelector('.goal-box');
+        if (box) {
+          box.style.outline = 'none';
+          const r = box.getBoundingClientRect();
+          const over = uv.clientX >= r.left && uv.clientX <= r.right && uv.clientY >= r.top && uv.clientY <= r.bottom;
+          if (over) dropOnGoal(coin);
+        }
+      }
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', up);
+    });
   });
 
   const resetBtn = document.createElement('button');
   resetBtn.type = 'button';
   resetBtn.textContent = '🔄 Reset';
   resetBtn.addEventListener('click', () => {
-    total = 0;
-    achieved.clear();
-    bankTotalEl.textContent = '0¢';
-    renderGoals();
+    goalIndex = 0;
+    current = 0;
+    renderGoal();
     status.textContent = '';
   });
   toolbar.appendChild(resetBtn);
 
-  renderGoals();
-  status.textContent = `Click a coin to add it to the ${bankLabel.toLowerCase()}. Reach every goal!`;
+  renderGoal();
+  status.textContent = 'Drag a coin onto the goal — reach the exact amount to move to the next one!';
 }
