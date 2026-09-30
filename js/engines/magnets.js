@@ -26,7 +26,7 @@ const MagnetsEngine = {
       el.type = 'button';
       el.className = 'tray-item';
       el.style.fontFamily = "'Baloo 2', sans-serif";
-      el.style.fontSize = '1.4rem';
+      el.style.fontSize = '1.8rem';
       el.textContent = t;
       el.dataset.emoji = t;
       tray.appendChild(el);
@@ -37,17 +37,17 @@ const MagnetsEngine = {
         const ghost = document.createElement('div');
         ghost.className = 'placed-item';
         ghost.style.fontFamily = "'Baloo 2', sans-serif";
-        ghost.style.fontSize = '1.6rem';
+        ghost.style.fontSize = '2.8rem';
         ghost.textContent = t;
         ghost.style.position = 'fixed';
-        ghost.style.left = ev.clientX - 16 + 'px';
-        ghost.style.top = ev.clientY - 16 + 'px';
+        ghost.style.left = ev.clientX - 22 + 'px';
+        ghost.style.top = ev.clientY - 22 + 'px';
         ghost.style.pointerEvents = 'none';
         ghost.style.zIndex = '999';
         document.body.appendChild(ghost);
         function move(mv) {
-          ghost.style.left = mv.clientX - 16 + 'px';
-          ghost.style.top = mv.clientY - 16 + 'px';
+          ghost.style.left = mv.clientX - 22 + 'px';
+          ghost.style.top = mv.clientY - 22 + 'px';
         }
         function up(uv) {
           window.removeEventListener('pointermove', move);
@@ -57,13 +57,15 @@ const MagnetsEngine = {
             const placed = document.createElement('div');
             placed.className = 'placed-item';
             placed.style.fontFamily = "'Baloo 2', sans-serif";
-            placed.style.fontSize = '1.6rem';
+            placed.style.fontSize = '2.8rem';
             placed.textContent = t;
-            placed.style.left = (uv.clientX - r.left - 16) + 'px';
-            placed.style.top = (uv.clientY - r.top - 16) + 'px';
+            placed.style.left = (uv.clientX - r.left - 22) + 'px';
+            placed.style.top = (uv.clientY - r.top - 22) + 'px';
             stage.appendChild(placed);
-            makeDraggable(placed, stage, { bounds: true });
-            placed.addEventListener('dblclick', () => placed.remove());
+            // Two quick taps remove a placed tile — handled via the drag
+            // helper's own tap detection rather than 'dblclick', which can
+            // be unreliably suppressed after preventDefault() on pointerdown.
+            makeDraggable(placed, stage, { bounds: true, onDoubleTap: () => placed.remove() });
           }
           ghost.remove();
         }
