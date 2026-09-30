@@ -148,10 +148,15 @@ const GAME_REGISTRY = {
     { title: 'Break the Bank - Sorting', icon: '🪙', skill: 'Drag each coin or bill into the bin where it belongs!',
       engine: 'sorter', config: { mode: 'sort', easyHardToggle: true,
         bins: [{ id: 'coins', emoji: '🪙', label: 'Coins' }, { id: 'bills', emoji: '💵', label: 'Bills' }],
+        // Coins get their own color/size/printed value (same scheme as
+        // Break the Bank - Counting) instead of all sharing one identical
+        // coin emoji — bills keep their emoji since 💵 already reads fine.
         items: [
-          { id: 'p1', emoji: '🪙', label: 'Penny', binId: 'coins' }, { id: 'p2', emoji: '🪙', label: 'Nickel', binId: 'coins' },
-          { id: 'p3', emoji: '🪙', label: 'Dime', binId: 'coins' }, { id: 'b1', emoji: '💵', label: 'Dollar bill', binId: 'bills' },
-          { id: 'b2', emoji: '💵', label: 'Five', binId: 'bills' }, { id: 'p4', emoji: '🪙', label: 'Quarter', binId: 'coins' }
+          { id: 'p1', label: 'Penny', tokenText: '1¢', color: '#B87333', tokenSize: 48, binId: 'coins' },
+          { id: 'p2', label: 'Nickel', tokenText: '5¢', color: '#B8BCC0', tokenSize: 54, binId: 'coins' },
+          { id: 'p3', label: 'Dime', tokenText: '10¢', color: '#B8BCC0', tokenSize: 38, binId: 'coins' },
+          { id: 'p4', label: 'Quarter', tokenText: '25¢', color: '#B8BCC0', tokenSize: 60, binId: 'coins' },
+          { id: 'b1', emoji: '💵', label: 'Dollar bill', binId: 'bills' }, { id: 'b2', emoji: '💵', label: 'Five', binId: 'bills' }
         ] } }
   ],
 
@@ -203,13 +208,21 @@ const GAME_REGISTRY = {
         items: [{ id: 'snowball', emoji: '⚪', label: 'Snowball' }] } },
     { title: 'Break the Bank - Sorting', icon: '🪙', skill: 'Drag each coin into the bin that matches it!',
       engine: 'sorter', config: { mode: 'sort', easyHardToggle: true,
-        bins: [{ id: 'penny', emoji: '🟤', label: 'Pennies' }, { id: 'nickel', emoji: '⚪', label: 'Nickels' },
-               { id: 'dime', emoji: '⚪', label: 'Dimes' }, { id: 'quarter', emoji: '⚪', label: 'Quarters' }],
+        // Bin icons printed as the actual value (1¢/5¢/10¢/25¢) instead of
+        // three bins sharing the same plain circle emoji.
+        bins: [{ id: 'penny', emoji: '1¢', label: 'Pennies' }, { id: 'nickel', emoji: '5¢', label: 'Nickels' },
+               { id: 'dime', emoji: '10¢', label: 'Dimes' }, { id: 'quarter', emoji: '25¢', label: 'Quarters' }],
+        // Coins get their own color/size/printed value, same scheme as
+        // Break the Bank - Counting, instead of every coin looking identical.
         items: [
-          { id: 'p1', emoji: '🪙', label: 'Penny', binId: 'penny' }, { id: 'p2', emoji: '🪙', label: 'Penny', binId: 'penny' },
-          { id: 'n1', emoji: '🪙', label: 'Nickel', binId: 'nickel' }, { id: 'n2', emoji: '🪙', label: 'Nickel', binId: 'nickel' },
-          { id: 'd1', emoji: '🪙', label: 'Dime', binId: 'dime' }, { id: 'd2', emoji: '🪙', label: 'Dime', binId: 'dime' },
-          { id: 'q1', emoji: '🪙', label: 'Quarter', binId: 'quarter' }, { id: 'q2', emoji: '🪙', label: 'Quarter', binId: 'quarter' }
+          { id: 'p1', label: 'Penny', tokenText: '1¢', color: '#B87333', tokenSize: 48, binId: 'penny' },
+          { id: 'p2', label: 'Penny', tokenText: '1¢', color: '#B87333', tokenSize: 48, binId: 'penny' },
+          { id: 'n1', label: 'Nickel', tokenText: '5¢', color: '#B8BCC0', tokenSize: 54, binId: 'nickel' },
+          { id: 'n2', label: 'Nickel', tokenText: '5¢', color: '#B8BCC0', tokenSize: 54, binId: 'nickel' },
+          { id: 'd1', label: 'Dime', tokenText: '10¢', color: '#B8BCC0', tokenSize: 38, binId: 'dime' },
+          { id: 'd2', label: 'Dime', tokenText: '10¢', color: '#B8BCC0', tokenSize: 38, binId: 'dime' },
+          { id: 'q1', label: 'Quarter', tokenText: '25¢', color: '#B8BCC0', tokenSize: 60, binId: 'quarter' },
+          { id: 'q2', label: 'Quarter', tokenText: '25¢', color: '#B8BCC0', tokenSize: 60, binId: 'quarter' }
         ] } },
     { title: 'Make a Robot', icon: '🤖', skill: 'Drag arms, eyes, and bolts to build your own robot!',
       engine: 'builder', config: { sceneEmoji: '🤖', sceneLabel: 'robot', maxPlacements: 10,
