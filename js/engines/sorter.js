@@ -274,6 +274,25 @@ function mountCountMode(container, config, api) {
         status.textContent = `Let's try ${goalAmounts[goalIndex]}¢ again.`;
         renderGoal();
       });
+    } else if (state === 'success') {
+      // Pause on a correct answer rather than instantly jumping ahead —
+      // same "Next" pattern as Bubble Pop Math's Next Round button.
+      box.style.border = '3px solid var(--chalk-green)';
+      box.style.background = '#EAF6EF';
+      box.style.color = 'var(--ink)';
+      box.innerHTML = `
+        <div style="font-size:2.2rem; line-height:1;">🎉</div>
+        <div style="font-size:0.8rem; opacity:0.75;">Goal ${goalIndex + 1} of ${goalAmounts.length}</div>
+        <div style="font-weight:800; font-family:'Baloo 2', sans-serif; font-size:1.3rem;">${goalAmounts[goalIndex]}¢ — exactly right!</div>
+        <button type="button" class="next-goal-btn primary" style="margin-top:6px; align-self:flex-end;">Next ➡️</button>
+      `;
+      box.querySelector('.next-goal-btn').addEventListener('click', () => {
+        goalIndex++;
+        current = 0;
+        state = 'playing';
+        status.textContent = goalIndex >= goalAmounts.length ? '' : `Goal ${goalIndex + 1}: reach ${goalAmounts[goalIndex]}¢.`;
+        renderGoal();
+      });
     } else {
       box.style.border = '3px dashed var(--paper-line)';
       box.style.background = '#fdfcf7';
@@ -293,15 +312,12 @@ function mountCountMode(container, config, api) {
       return;
     }
     if (goalIndex >= goalAmounts.length) return; // already finished every goal
+    if (state === 'success') return; // already solved — waiting for Next click
     const target = goalAmounts[goalIndex];
     current += coin.value;
     if (current === target) {
-      status.innerHTML = `<span class="celebrate">🎉 ${target}¢ — exactly right!</span>`;
-      goalIndex++;
-      current = 0;
-      if (goalIndex >= goalAmounts.length) {
-        status.innerHTML = `<span class="celebrate">🎉 All goals reached! Press Reset to play again.</span>`;
-      }
+      state = 'success';
+      status.textContent = '';
     } else if (current > target) {
       state = 'error';
       status.textContent = '';
@@ -358,18 +374,6 @@ function mountCountMode(container, config, api) {
       window.addEventListener('pointerup', up);
     });
   });
-
-  const resetBtn = document.createElement('button');
-  resetBtn.type = 'button';
-  resetBtn.textContent = '🔄 Reset';
-  resetBtn.addEventListener('click', () => {
-    goalIndex = 0;
-    current = 0;
-    state = 'playing';
-    renderGoal();
-    status.textContent = '';
-  });
-  toolbar.appendChild(resetBtn);
 
   renderGoal();
   status.textContent = 'Drag a coin onto the goal — reach the exact amount to move to the next one!';
