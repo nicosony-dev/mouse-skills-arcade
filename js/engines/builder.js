@@ -195,7 +195,21 @@ const BuilderEngine = {
       const el = document.createElement('button');
       el.type = 'button';
       el.className = 'tray-item';
-      renderItemVisual(el, item, item.html ? 40 : null);
+      if (item.html) {
+        // Size an inner wrapper, not the button itself — the button's own
+        // CSS padding/border needs to stay intact so this tile's overall
+        // footprint matches its plain-emoji siblings in the tray.
+        const inner = document.createElement('span');
+        inner.style.display = 'inline-flex';
+        inner.style.alignItems = 'center';
+        inner.style.justifyContent = 'center';
+        inner.style.width = '34px';
+        inner.style.height = '34px';
+        renderItemVisual(inner, item, 34);
+        el.appendChild(inner);
+      } else {
+        renderItemVisual(el, item, null);
+      }
       el.title = item.label;
       el.setAttribute('aria-label', item.label);
       tray.appendChild(el);
