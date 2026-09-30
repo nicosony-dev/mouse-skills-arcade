@@ -121,7 +121,7 @@ function renderEducators() {
       as that on-ramp, ahead of (or alongside) content-based digital and media literacy lessons.</p>
 
       <h2>A note on scope</h2>
-      <p>Titles that repeat across grade levels (Tangrams, ABCya Paint, Make a Pizza, and others) share one
+      <p>Titles that repeat across grade levels (Tangrams, Paint, Make a Pizza, and others) share one
       underlying game engine, scaled up in difficulty at each grade — more pieces, finer precision, and larger
       decoration sets as students get older. The USA Geography Puzzle uses simplified placeholder shapes at
       approximate locations rather than exact state outlines, to keep the focus on precise drag-and-drop control.</p>
