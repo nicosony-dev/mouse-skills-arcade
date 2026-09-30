@@ -206,18 +206,25 @@ function mountCountMode(container, config, api) {
   let current = 0;
   let state = 'playing'; // 'playing' | 'error' | 'allDone'
 
+  // Positioned so the Next button (added below) can anchor to this
+  // container's own bottom-right corner, detached from the celebration
+  // card itself rather than living inside it.
+  container.style.position = 'relative';
+
   container.innerHTML = `
     <div class="toolbar"></div>
     <div class="tray coin-tray" aria-label="Coins — drag one onto the goal"
          style="justify-content:center;"></div>
     <p class="status-line" style="margin-top:14px;"></p>
     <div class="goals-row" style="display:flex; justify-content:center; margin-top:10px;" aria-label="Current goal"></div>
+    <div class="next-goal-corner" style="position:absolute; right:18px; bottom:18px;"></div>
   `;
 
   const toolbar = container.querySelector('.toolbar');
   const tray = container.querySelector('.tray');
   const status = container.querySelector('.status-line');
   const goalsRow = container.querySelector('.goals-row');
+  const nextCorner = container.querySelector('.next-goal-corner');
 
   function styleAsToken(el, coin) {
     el.textContent = coin.tokenText || coin.label;
@@ -276,7 +283,9 @@ function mountCountMode(container, config, api) {
       });
     } else if (state === 'success') {
       // Pause on a correct answer rather than instantly jumping ahead —
-      // same "Next" pattern as Bubble Pop Math's Next Round button.
+      // same "Next" pattern as Bubble Pop Math's Next Round button. The
+      // button itself lives outside this card, anchored to the overall
+      // game area's bottom-right corner (see nextCorner below).
       box.style.border = '3px solid var(--chalk-green)';
       box.style.background = '#EAF6EF';
       box.style.color = 'var(--ink)';
@@ -284,15 +293,7 @@ function mountCountMode(container, config, api) {
         <div style="font-size:2.2rem; line-height:1;">🎉</div>
         <div style="font-size:0.8rem; opacity:0.75;">Goal ${goalIndex + 1} of ${goalAmounts.length}</div>
         <div style="font-weight:800; font-family:'Baloo 2', sans-serif; font-size:1.3rem;">${goalAmounts[goalIndex]}¢ — exactly right!</div>
-        <button type="button" class="next-goal-btn primary" style="margin-top:6px; align-self:flex-end;">Next ➡️</button>
       `;
-      box.querySelector('.next-goal-btn').addEventListener('click', () => {
-        goalIndex++;
-        current = 0;
-        state = 'playing';
-        status.textContent = goalIndex >= goalAmounts.length ? '' : `Goal ${goalIndex + 1}: reach ${goalAmounts[goalIndex]}¢.`;
-        renderGoal();
-      });
     } else {
       box.style.border = '3px dashed var(--paper-line)';
       box.style.background = '#fdfcf7';
@@ -304,6 +305,24 @@ function mountCountMode(container, config, api) {
       `;
     }
     goalsRow.appendChild(box);
+
+    // The Next button only exists while state is 'success' — it lives in
+    // its own corner element, detached from the celebration card above.
+    nextCorner.innerHTML = '';
+    if (!finished && state === 'success') {
+      const nextBtn = document.createElement('button');
+      nextBtn.type = 'button';
+      nextBtn.className = 'primary';
+      nextBtn.textContent = 'Next ➡️';
+      nextBtn.addEventListener('click', () => {
+        goalIndex++;
+        current = 0;
+        state = 'playing';
+        status.textContent = goalIndex >= goalAmounts.length ? '' : `Goal ${goalIndex + 1}: reach ${goalAmounts[goalIndex]}¢.`;
+        renderGoal();
+      });
+      nextCorner.appendChild(nextBtn);
+    }
   }
 
   function dropOnGoal(coin) {
