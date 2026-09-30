@@ -80,17 +80,17 @@ const GAME_REGISTRY = {
     },
     {
       title: 'Same & Different', icon: '🍩', skill: 'Look closely, then click the one that matches!',
-      engine: 'match', config: { rounds: [
-        { mode: 'same', target: { shape: 'circle', color: '#E85D4C' }, options: [
-          { shape: 'circle', color: '#E85D4C', correct: true }, { shape: 'square', color: '#4FA8D8', correct: false }
-        ] },
-        { mode: 'same', target: { shape: 'triangle', color: '#F4A825' }, options: [
-          { shape: 'circle', color: '#F4A825', correct: false }, { shape: 'triangle', color: '#F4A825', correct: true }
-        ] },
-        { mode: 'different', target: { shape: 'square', color: '#8E6BB0' }, options: [
-          { shape: 'square', color: '#8E6BB0', correct: false }, { shape: 'circle', color: '#2F5D50', correct: true }
-        ] }
-      ] }
+      // 15 things to draw from (5 shapes, 5 letters, 5 numbers) instead of
+      // just 3 shapes, and rounds are generated fresh each playthrough.
+      engine: 'match', config: {
+        pool: {
+          shapes: ['circle', 'square', 'triangle', 'star', 'heart'],
+          letters: ['A', 'B', 'C', 'D', 'E'],
+          numbers: ['1', '2', '3', '4', '5']
+        },
+        colors: ['#E85D4C', '#4FA8D8', '#F4A825', '#8E6BB0', '#2F5D50'],
+        roundCount: 10
+      }
     }
   ],
 
