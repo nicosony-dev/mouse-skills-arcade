@@ -46,7 +46,7 @@ const GAME_REGISTRY = {
     {
       title: 'Make a Cake', icon: '🎂', skill: 'Drag candles, cherries, and sprinkles onto your cake!',
       engine: 'builder', config: { sceneEmoji: '🎂', sceneLabel: 'cake', maxPlacements: 8,
-        items: [{ id: 'candle', emoji: '🕯️', label: 'Candle' }, { id: 'cherry', emoji: '🍒', label: 'Cherry' },
+        items: [{ id: 'candle', html: '<svg viewBox="0 0 40 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="candleStripes__UID__" width="10" height="10" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="#F4A825"/><rect width="5" height="10" fill="#2F5D50"/></pattern></defs><rect x="12" y="26" width="16" height="66" rx="4" fill="url(#candleStripes__UID__)" stroke="#2B2621" stroke-width="2"/><rect x="18" y="20" width="4" height="8" fill="#2B2621"/><ellipse cx="20" cy="12" rx="6" ry="10" fill="#F4A825"/><ellipse cx="20" cy="14" rx="3" ry="6" fill="#FBF6EC"/></svg>', label: 'Candle' }, { id: 'cherry', emoji: '🍒', label: 'Cherry' },
                 { id: 'star', emoji: '⭐', label: 'Sprinkle star' }, { id: 'heart', emoji: '💖', label: 'Heart' }] }
     },
     {
@@ -112,7 +112,7 @@ const GAME_REGISTRY = {
       engine: 'paint', config: { mirrorMode: true } },
     { title: 'Make a Cake', icon: '🎂', skill: 'Drag candles, cherries, and toppings onto your cake!',
       engine: 'builder', config: { sceneEmoji: '🎂', sceneLabel: 'cake', maxPlacements: 12,
-        items: [{ id: 'candle', emoji: '🕯️', label: 'Candle' }, { id: 'cherry', emoji: '🍒', label: 'Cherry' },
+        items: [{ id: 'candle', html: '<svg viewBox="0 0 40 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="candleStripes__UID__" width="10" height="10" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="#F4A825"/><rect width="5" height="10" fill="#2F5D50"/></pattern></defs><rect x="12" y="26" width="16" height="66" rx="4" fill="url(#candleStripes__UID__)" stroke="#2B2621" stroke-width="2"/><rect x="18" y="20" width="4" height="8" fill="#2B2621"/><ellipse cx="20" cy="12" rx="6" ry="10" fill="#F4A825"/><ellipse cx="20" cy="14" rx="3" ry="6" fill="#FBF6EC"/></svg>', label: 'Candle' }, { id: 'cherry', emoji: '🍒', label: 'Cherry' },
                 { id: 'star', emoji: '⭐', label: 'Sprinkle star' }, { id: 'heart', emoji: '💖', label: 'Heart' },
                 { id: 'straw', emoji: '🍓', label: 'Strawberry' }] } },
     { title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings onto your pizza!',
@@ -168,7 +168,7 @@ const GAME_REGISTRY = {
       engine: 'pixelart', config: { gridSize: 12 } },
     { title: 'Make a Cake', icon: '🎂', skill: 'Drag candles, cherries, and toppings onto your cake!',
       engine: 'builder', config: { sceneEmoji: '🎂', sceneLabel: 'cake', maxPlacements: 16,
-        items: [{ id: 'candle', emoji: '🕯️', label: 'Candle' }, { id: 'cherry', emoji: '🍒', label: 'Cherry' },
+        items: [{ id: 'candle', html: '<svg viewBox="0 0 40 100" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="candleStripes__UID__" width="10" height="10" patternTransform="rotate(45)" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="#F4A825"/><rect width="5" height="10" fill="#2F5D50"/></pattern></defs><rect x="12" y="26" width="16" height="66" rx="4" fill="url(#candleStripes__UID__)" stroke="#2B2621" stroke-width="2"/><rect x="18" y="20" width="4" height="8" fill="#2B2621"/><ellipse cx="20" cy="12" rx="6" ry="10" fill="#F4A825"/><ellipse cx="20" cy="14" rx="3" ry="6" fill="#FBF6EC"/></svg>', label: 'Candle' }, { id: 'cherry', emoji: '🍒', label: 'Cherry' },
                 { id: 'star', emoji: '⭐', label: 'Sprinkle star' }, { id: 'heart', emoji: '💖', label: 'Heart' },
                 { id: 'straw', emoji: '🍓', label: 'Strawberry' }, { id: 'choc', emoji: '🍫', label: 'Chocolate drizzle' }] } },
     { title: 'Make a Pizza', icon: '🍕', skill: 'Drag toppings like pepperoni, mushrooms, and pineapple onto your pizza!',
